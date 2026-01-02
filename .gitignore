@@ -56,9 +56,7 @@ firebase-debug.log
 web/flutter_service_worker.js
 google-services.json
 lib/firebase_options.dart
-# Github-workflows
-.github/workflows/firebase-hosting-pull-request.yml
-.github/workflows/firebase-hosting-merge.yml
+
 firebase.json
 .firebaserc
 
