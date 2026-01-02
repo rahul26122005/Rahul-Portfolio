@@ -1,0 +1,12 @@
+export 'guest_dashboard.dart';
+export '../auth_screens/login_screen.dart';
+export '../auth_screens/sign_up.dart';
+export '../auth_screens/forgot_password.dart';
+export '../screens/teacher_files/upload_students_page.dart';
+export '../screens/teacher_files/upload_marks_page.dart';
+export '../screens/teacher_files/mark_attendance.dart';
+export '../screens/teacher_files/teacher_dashboard.dart';
+export '../screens/teacher_files/monthly_summary.dart';
+export '../screens/students_files/student_dashboard.dart';
+export 'students_files/student_report_page.dart';
+export '../screens/teacher_files/attendance_report_generate_page.dart';
