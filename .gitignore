@@ -56,6 +56,5 @@ firebase-debug.log
 web/flutter_service_worker.js
 google-services.json
 
-firebase.json
-.firebaserc
+
 
