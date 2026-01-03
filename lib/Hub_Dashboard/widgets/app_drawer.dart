@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../main.dart';
-import '/routes/app_routes.dart';
+import 'package:my_flutter_webside/main.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class DrawerPage extends StatefulWidget {
   final Function(bool) onThemeChange;

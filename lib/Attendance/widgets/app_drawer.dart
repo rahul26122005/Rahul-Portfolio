@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_flutter_webside/main.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:provider/provider.dart';
-
-import '../../main.dart';
-import '/routes/app_routes.dart';
 
 class DrawerPage extends StatefulWidget {
   final Function(bool) onThemeChange;
@@ -42,8 +41,7 @@ class _DrawerPageState extends State<DrawerPage> {
     }
   }
 
-  bool _isAdminOrTeacher(String role) =>
-      role == 'admin' || role == 'teacher';
+  bool _isAdminOrTeacher(String role) => role == 'admin' || role == 'teacher';
 
   // ================= MENU TILE =================
   Widget _menuTile({
@@ -51,11 +49,7 @@ class _DrawerPageState extends State<DrawerPage> {
     required String title,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      onTap: onTap,
-    );
+    return ListTile(leading: Icon(icon), title: Text(title), onTap: onTap);
   }
 
   @override
@@ -63,9 +57,7 @@ class _DrawerPageState extends State<DrawerPage> {
     final user = _auth.currentUser;
 
     if (user == null) {
-      return const Drawer(
-        child: Center(child: Text("Not logged in")),
-      );
+      return const Drawer(child: Center(child: Text("Not logged in")));
     }
 
     return Drawer(
@@ -109,16 +101,11 @@ class _DrawerPageState extends State<DrawerPage> {
                 accountEmail: Text(email),
                 currentAccountPicture: CircleAvatar(
                   backgroundColor: Colors.white,
-                  backgroundImage:
-                      photoUrl != null && photoUrl.isNotEmpty
-                          ? NetworkImage(photoUrl)
-                          : null,
+                  backgroundImage: photoUrl != null && photoUrl.isNotEmpty
+                      ? NetworkImage(photoUrl)
+                      : null,
                   child: (photoUrl == null || photoUrl.isEmpty)
-                      ? const Icon(
-                          Icons.person,
-                          size: 40,
-                          color: Colors.grey,
-                        )
+                      ? const Icon(Icons.person, size: 40, color: Colors.grey)
                       : null,
                 ),
                 otherAccountsPictures: [
@@ -193,25 +180,20 @@ class _DrawerPageState extends State<DrawerPage> {
               // ================= SETTINGS =================
               SwitchListTile(
                 secondary: Icon(
-                  context.watch<ThemeNotifier>().themeMode ==
-                          ThemeMode.dark
+                  context.watch<ThemeNotifier>().themeMode == ThemeMode.dark
                       ? Icons.dark_mode
                       : Icons.light_mode,
                 ),
                 title: const Text('Dark Mode'),
-                value: context.watch<ThemeNotifier>().themeMode ==
-                    ThemeMode.dark,
+                value:
+                    context.watch<ThemeNotifier>().themeMode == ThemeMode.dark,
                 onChanged: (value) {
                   widget.onThemeChange(value);
                   context.read<ThemeNotifier>().toggleTheme();
                 },
               ),
 
-              _menuTile(
-                icon: Icons.logout,
-                title: 'Logout',
-                onTap: _logout,
-              ),
+              _menuTile(icon: Icons.logout, title: 'Logout', onTap: _logout),
 
               const SizedBox(height: 12),
 
@@ -230,22 +212,19 @@ class _DrawerPageState extends State<DrawerPage> {
   }
 
   // ================= ERROR DRAWER =================
-Widget _errorDrawer(BuildContext context) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile load failed. Redirecting...'),
-      ),
-    );
+  Widget _errorDrawer(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile load failed. Redirecting...')),
+      );
 
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.notFound,
-      (route) => false,
-    );
-  });
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRoutes.notFound,
+        (route) => false,
+      );
+    });
 
-  return const Center(child: CircularProgressIndicator());
-}
-
+    return const Center(child: CircularProgressIndicator());
+  }
 }

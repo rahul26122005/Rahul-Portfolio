@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Hub_Dashboard/models/project_model.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/models/project_model.dart';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;

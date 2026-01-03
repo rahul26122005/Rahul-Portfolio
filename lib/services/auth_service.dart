@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '/routes/app_routes.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

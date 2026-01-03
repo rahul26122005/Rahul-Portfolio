@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/auth_service.dart';
+import 'package:my_flutter_webside/services/auth_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -26,11 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1E3C72),
-              Color(0xFF2A5298),
-              Color(0xFF4CAF50),
-            ],
+            colors: [Color(0xFF1E3C72), Color(0xFF2A5298), Color(0xFF4CAF50)],
           ),
         ),
         child: Center(
@@ -52,9 +48,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       children: [
                         Text(
                           "Create Account",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
+                          style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
 
@@ -62,10 +56,9 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         Text(
                           "Sign up to continue",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.grey),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
                         ),
 
                         const SizedBox(height: 24),
@@ -81,8 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           },
                           decoration: InputDecoration(
                             labelText: "Name",
-                            prefixIcon:
-                                const Icon(Icons.person_outline),
+                            prefixIcon: const Icon(Icons.person_outline),
                             filled: true,
                             fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(
@@ -96,8 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         //  Email
                         TextFormField(
                           controller: emailCtrl,
-                          keyboardType:
-                              TextInputType.emailAddress,
+                          keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Email is required";
@@ -109,8 +100,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           },
                           decoration: InputDecoration(
                             labelText: "Email",
-                            prefixIcon:
-                                const Icon(Icons.email_outlined),
+                            prefixIcon: const Icon(Icons.email_outlined),
                             filled: true,
                             fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(
@@ -136,8 +126,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           },
                           decoration: InputDecoration(
                             labelText: "Password",
-                            prefixIcon:
-                                const Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword
@@ -146,8 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscurePassword =
-                                      !_obscurePassword;
+                                  _obscurePassword = !_obscurePassword;
                                 });
                               },
                             ),
@@ -169,32 +157,26 @@ class _SignupScreenState extends State<SignupScreen> {
                             onPressed: loading
                                 ? null
                                 : () async {
-                                    if (!_formKey.currentState!
-                                        .validate()) {
+                                    if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
 
                                     setState(() => loading = true);
 
                                     try {
-                                      await AuthService()
-                                          .teacherSignup(
-                                        name:
-                                            nameCtrl.text.trim(),
-                                        email:
-                                            emailCtrl.text.trim(),
-                                        password:
-                                            passCtrl.text.trim(),
+                                      await AuthService().teacherSignup(
+                                        name: nameCtrl.text.trim(),
+                                        email: emailCtrl.text.trim(),
+                                        password: passCtrl.text.trim(),
                                       );
 
                                       if (!mounted) return;
 
                                       ScaffoldMessenger.of(
-                                              context)
-                                          .showSnackBar(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text(
-                                              "Signup successful"),
+                                          content: Text("Signup successful"),
                                         ),
                                       );
 
@@ -202,17 +184,13 @@ class _SignupScreenState extends State<SignupScreen> {
                                     } catch (e) {
                                       if (!mounted) return;
                                       ScaffoldMessenger.of(
-                                              context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content:
-                                              Text(e.toString()),
-                                        ),
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(content: Text(e.toString())),
                                       );
                                     } finally {
                                       if (mounted) {
-                                        setState(
-                                            () => loading = false);
+                                        setState(() => loading = false);
                                       }
                                     }
                                   },
@@ -220,8 +198,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ? const SizedBox(
                                     height: 22,
                                     width: 22,
-                                    child:
-                                        CircularProgressIndicator(
+                                    child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       color: Colors.white,
                                     ),
@@ -236,9 +213,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: const Text(
-                            "Already have an account? Sign In",
-                          ),
+                          child: const Text("Already have an account? Sign In"),
                         ),
                       ],
                     ),

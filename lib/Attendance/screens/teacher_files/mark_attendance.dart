@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import '../../widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 //import '/services/sms_services.dart';
 
 class AttendancePage extends StatefulWidget {

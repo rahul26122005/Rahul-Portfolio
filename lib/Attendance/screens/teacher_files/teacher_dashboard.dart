@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../admin/admin_panel.dart';
-import '../../../routes/app_routes.dart';
-import '../../widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/admin/admin_panel.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
+
 
 class TeacherDashboard extends StatefulWidget {
   final String role; // teacher / admin
@@ -44,60 +45,52 @@ class _TeacherDashboardState extends State<TeacherDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-              appBar: AppBar(
-                title: const Text(
-                  "Attendance Management System",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                    color: Colors.white,
-                    fontFeatures: [FontFeature.enable('swap')],
-                    fontStyle: FontStyle.italic,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Attendance Management System",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+            color: Colors.white,
+            fontFeatures: [FontFeature.enable('swap')],
+            fontStyle: FontStyle.italic,
 
-                    shadows: [
-                      Shadow(
-                        offset: Offset(2, 2),
-                        blurRadius: 10,
-                        color: Colors.black,
-                      ),
-                    ],
-                  ),
-                ),
-                centerTitle: true,
-                backgroundColor: Color(0xFF1E3C72),
+            shadows: [
+              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
+            ],
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Color(0xFF1E3C72),
+      ),
+      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      body: FadeTransition(
+        opacity: _fadeAnm,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF3F51B5), Color(0xFF2196F3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _header(),
+                  const SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                  Expanded(child: _dashboardGrid()),
+                ],
               ),
-              drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
-              body: FadeTransition(
-                opacity: _fadeAnm,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF3F51B5), Color(0xFF2196F3)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _header(),
-                          const SizedBox(height: 20),
-                          const SizedBox(height: 20),
-                          Expanded(child: _dashboardGrid()),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-
+            ),
+          ),
+        ),
+      ),
     );
-
-
   }
 
   // HEADER

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../widgets/emptystate.dart';
-import '../widgets/errorstate.dart';
-import '../widgets/project_card.dart';
-import '../widgets/app_drawer.dart';
-import '/routes/app_routes.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/emptystate.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/errorstate.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/project_card.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:provider/provider.dart';
-import '../../main.dart';
+import 'package:my_flutter_webside/main.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

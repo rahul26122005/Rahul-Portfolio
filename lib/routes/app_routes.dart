@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../Hub_Dashboard/screens/screens.dart';
-import '../admin/admin_panel.dart';
-import '../Admin/manage_classes_page.dart';
-import '../Admin/manage_teachers_page.dart';
-import '../notfound_page.dart';
-import '../Attendance/screens/screens.dart';
-import '../role_guard.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/screens/screens.dart';
+import 'package:my_flutter_webside/admin/admin_panel.dart';
+import 'package:my_flutter_webside/admin/manage_classes_page.dart';
+import 'package:my_flutter_webside/admin/manage_teachers_page.dart';
+import 'package:my_flutter_webside/notfound_page.dart';
+import 'package:my_flutter_webside/Attendance/screens/screens.dart';
+import 'package:my_flutter_webside/role_guard.dart';
 
 class AppRoutes {
   // ================= ROUTE NAMES =================
@@ -74,7 +74,8 @@ class AppRoutes {
     ),
     monthlysummary: (context) => RoleGuard(
       allowedRoles: const ['teacher', 'admin'],
-      child: const MonthlySummaryPage(),),
+      child: const MonthlySummaryPage(),
+    ),
 
     // ---------- STUDENT ----------
     studentDashboard: (context) => RoleGuard(

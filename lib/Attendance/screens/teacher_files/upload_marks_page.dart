@@ -3,8 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import '../../widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 
 class UploadMarksPage extends StatefulWidget {
   const UploadMarksPage({super.key});
@@ -16,12 +15,12 @@ class UploadMarksPage extends StatefulWidget {
 class _UploadMarksPageState extends State<UploadMarksPage> {
   bool _isDarkMode = true;
 
-
   // ================= THEME =================
   void _toggleTheme(bool value) {
     if (!mounted) return;
     setState(() => _isDarkMode = value);
   }
+
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -131,9 +130,7 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
         final subjectName = row[1]?.value?.toString().trim();
         final marksStr = row[2]?.value?.toString().trim();
 
-        if ([regNo, subjectName, marksStr].any(
-          (e) => e == null || e.isEmpty,
-        )) {
+        if ([regNo, subjectName, marksStr].any((e) => e == null || e.isEmpty)) {
           _showDialog("Error", "Row ${i + 1}: Empty values");
           setState(() => isUploading = false);
           return;
@@ -199,7 +196,6 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
       }
 
       _showSnack("Uploaded $uploaded marks successfully");
-
     } catch (e) {
       _showDialog("Upload Failed", e.toString());
     }
@@ -209,7 +205,9 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
 
   // ================= SUBJECT =================
   Future<DocumentReference> _getOrCreateSubject(
-      String name, String className) async {
+    String name,
+    String className,
+  ) async {
     final snap = await _db
         .collection('subjects')
         .where('name', isEqualTo: name)
@@ -289,18 +287,23 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
                 builder: (_, snap) {
                   if (!snap.hasData) return const LinearProgressIndicator();
 
-                  final classes = snap.data!.docs
-                      .map((d) => d['class'].toString())
-                      .toSet()
-                      .toList()
-                    ..sort();
+                  final classes =
+                      snap.data!.docs
+                          .map((d) => d['class'].toString())
+                          .toSet()
+                          .toList()
+                        ..sort();
 
                   return DropdownButtonFormField<String>(
                     initialValue: selectedClass,
                     decoration: const InputDecoration(labelText: "Class"),
                     items: classes
-                        .map((c) =>
-                            DropdownMenuItem(value: c, child: Text("Class $c")))
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Text("Class $c"),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setState(() {
@@ -324,30 +327,31 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
                       return const LinearProgressIndicator();
                     }
 
-                    final sections = snap.data!.docs
-                        .map((d) => d['section'].toString())
-                        .toSet()
-                        .toList()
-                      ..sort();
+                    final sections =
+                        snap.data!.docs
+                            .map((d) => d['section'].toString())
+                            .toSet()
+                            .toList()
+                          ..sort();
 
                     return DropdownButtonFormField<String>(
                       initialValue: selectedSection,
                       decoration: const InputDecoration(labelText: "Section"),
                       items: sections
-                          .map((s) => DropdownMenuItem(
-                                value: s,
-                                child: Text("Section $s"),
-                              ))
+                          .map(
+                            (s) => DropdownMenuItem(
+                              value: s,
+                              child: Text("Section $s"),
+                            ),
+                          )
                           .toList(),
-                      onChanged: (v) =>
-                          setState(() => selectedSection = v),
+                      onChanged: (v) => setState(() => selectedSection = v),
                     );
                   },
                 ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
-                onPressed:
-                    selectedSection == null ? null : _pickExcel,
+                onPressed: selectedSection == null ? null : _pickExcel,
                 icon: const Icon(Icons.upload_file),
                 label: const Text("Choose Excel File"),
               ),

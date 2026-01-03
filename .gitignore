@@ -55,7 +55,6 @@ ios/Runner/GoogleService-Info.plist
 firebase-debug.log
 web/flutter_service_worker.js
 google-services.json
-lib/firebase_options.dart
 
 firebase.json
 .firebaserc

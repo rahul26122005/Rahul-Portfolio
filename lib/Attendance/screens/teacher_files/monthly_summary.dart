@@ -69,12 +69,13 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
       for (final v in records.values) {
         if (v == "P") {
           p++;
-        } else if (v == "A")
+        } else if (v == "A") {
           a++;
-        else if (v == "OD")
+        } else if (v == "OD") {
           od++;
-        else if (v == "HD")
+        } else if (v == "HD") {
           hd++;
+        }
       }
     }
 

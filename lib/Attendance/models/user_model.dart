@@ -88,5 +88,3 @@ class AppUser {
   bool get isStudent => role == 'student';
   bool get isGuest => role == 'guest';
 }
-
-

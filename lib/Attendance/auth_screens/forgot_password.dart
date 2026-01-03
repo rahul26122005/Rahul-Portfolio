@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'login_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
@@ -35,9 +34,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Password reset link sent to ${_emailController.text}',
-          ),
+          content: Text('Password reset link sent to ${_emailController.text}'),
         ),
       );
 
@@ -45,7 +42,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
       if (!mounted) return;
 
-      Navigator.pop(context); 
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
@@ -60,9 +57,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Forgot Password'),
-      ),
+      appBar: AppBar(title: const Text('Forgot Password')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -70,11 +65,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             key: _formKey,
             child: Column(
               children: [
-                const Icon(
-                  Icons.lock_reset,
-                  size: 80,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.lock_reset, size: 80, color: Colors.blue),
                 const SizedBox(height: 20),
 
                 TextFormField(
