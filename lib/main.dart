@@ -5,16 +5,15 @@ import 'firebase_options.dart';
 import 'routes/app_routes.dart';
 
 Future<void> main() async {
-
- try {
-   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp(
-     options: DefaultFirebaseOptions.currentPlatform,
-   );
- } catch (e, stack) {
-   debugPrint('🔥 Firebase init failed: $e');
-   debugPrintStack(stackTrace: stack);
- }
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e, stack) {
+    debugPrint('Firebase init failed: $e');
+    debugPrintStack(stackTrace: stack);
+  }
 
   runApp(
     ChangeNotifierProvider(

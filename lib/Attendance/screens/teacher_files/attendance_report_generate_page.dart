@@ -8,7 +8,6 @@ import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 
-
 class AttendanceReportGeneratePage extends StatefulWidget {
   const AttendanceReportGeneratePage({super.key});
 
@@ -27,6 +26,7 @@ class _AttendanceReportGeneratePageState
     if (!mounted) return;
     setState(() => _isDarkMode = value);
   }
+
   String? selectedClass;
   String? selectedSection;
   int selectedMonth = DateTime.now().month;
@@ -199,10 +199,16 @@ class _AttendanceReportGeneratePageState
           final cellIndex = row.length;
 
           row.add(cell);
-          sheet.cell(
+          sheet
+              .cell(
                 CellIndex.indexByColumnRow(
                   columnIndex: cellIndex,
-                  rowIndex: sheet.maxRows,),).cellStyle = styleFor(v);
+                  rowIndex: sheet.maxRows,
+                ),
+              )
+              .cellStyle = styleFor(
+            v,
+          );
 
           validDays++;
 
@@ -261,30 +267,38 @@ class _AttendanceReportGeneratePageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            appBar: AppBar(
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('smcp')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
+      appBar: AppBar(
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
-      //appBar: AppBar(title: const Text("Attendance Report")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
+            _header(),
+            const SizedBox(height: 30),
             _dropdown("Class", selectedClass, classes, (v) {
               setState(() => selectedClass = v);
               _loadSections(v!);
@@ -319,6 +333,23 @@ class _AttendanceReportGeneratePageState
           ],
         ),
       ),
+    );
+  }
+
+  Widget _header() {
+    return Row(
+      children: const [
+        Icon(Icons.get_app_rounded, size: 40, color: Colors.cyan),
+        SizedBox(width: 10),
+        Text(
+          "Student Dashboard",
+          style: TextStyle(
+            color: Colors.cyan,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 

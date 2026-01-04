@@ -22,22 +22,29 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('smcp')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
       body: Container(
         decoration: const BoxDecoration(
@@ -73,7 +80,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         Text(
                           "Login to continue",
-                          style: TextStyle(color: Colors.black, fontSize: 18),
+                          style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontSize: 22,
+                          ),
                         ),
 
                         const SizedBox(height: 24),
@@ -95,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             labelText: "Email",
                             prefixIcon: const Icon(Icons.email_outlined),
                             filled: true,
-                            fillColor: Colors.grey.shade100,
+                            fillColor: Colors.black12,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -133,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                             ),
                             filled: true,
-                            fillColor: Colors.grey.shade100,
+                            fillColor: Colors.black12,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),

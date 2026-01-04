@@ -33,74 +33,108 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('smcp')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
-      ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
-      //appBar: AppBar(title: const Text("Upload Students")),
-      body: Center(
-        child: Card(
-          margin: const EdgeInsets.all(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Excel Columns (ALL REQUIRED)",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Excel Columns must be in the following order:",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "Name | Register No | Class | Section | DOB | Father Mobile",
-                  style: TextStyle(color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.upload),
-                  label: const Text("Choose Excel File"),
-                  onPressed: isUploading ? null : _pickFile,
-                ),
-
-                if (selectedFileName != null) ...[
-                  const SizedBox(height: 12),
-                  Text("Selected: $selectedFileName"),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: isUploading ? null : _confirmUpload,
-                    child: const Text("Confirm & Upload"),
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
                   ),
                 ],
+              ),
+            );
+          },
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1E3C72),
+      ),
+      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const SizedBox(height: 10),
+          _header(),
 
-                if (isUploading) ...[
-                  const SizedBox(height: 20),
-                  const LinearProgressIndicator(),
-                ],
-              ],
+          Center(
+            child: Card(
+              margin: const EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Excel Columns (ALL REQUIRED)",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      "Excel Columns must be in the following order:",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      "Name | Register No | Class | Section | DOB | Father Mobile",
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 20),
+
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.upload),
+                      label: const Text("Choose Excel File"),
+                      onPressed: isUploading ? null : _pickFile,
+                    ),
+
+                    if (selectedFileName != null) ...[
+                      const SizedBox(height: 12),
+                      Text("Selected: $selectedFileName"),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: isUploading ? null : _confirmUpload,
+                        child: const Text("Confirm & Upload"),
+                      ),
+                    ],
+
+                    if (isUploading) ...[
+                      const SizedBox(height: 20),
+                      const LinearProgressIndicator(),
+                    ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+
+  // HEADER
+  Widget _header() {
+    return Row(
+      children: const [
+        Icon(Icons.people, size: 40, color: Colors.cyan),
+        SizedBox(width: 10),
+        Text(
+          "Upload Students",
+          style: TextStyle(
+            color: Colors.cyan,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 

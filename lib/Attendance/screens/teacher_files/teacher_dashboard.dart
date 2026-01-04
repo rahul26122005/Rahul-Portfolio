@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/admin/admin_panel.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
-
 
 class TeacherDashboard extends StatefulWidget {
   final String role; // teacher / admin
@@ -15,7 +15,9 @@ class TeacherDashboard extends StatefulWidget {
 class _TeacherDashboardState extends State<TeacherDashboard>
     with SingleTickerProviderStateMixin {
   bool _isDarkMode = true;
-
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final user = FirebaseAuth.instance.currentUser;
   // ================= THEME =================
   void _toggleTheme(bool value) {
     if (!mounted) return;
@@ -37,32 +39,40 @@ class _TeacherDashboardState extends State<TeacherDashboard>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 300),
     );
     _fadeAnm = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    //_controller.forward();
+    _controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('swap')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
       body: FadeTransition(
@@ -81,6 +91,37 @@ class _TeacherDashboardState extends State<TeacherDashboard>
               child: Column(
                 children: [
                   _header(),
+                  FutureBuilder<String>(
+                    future: _firestore
+                        .collection('users')
+                        .doc(user?.uid)
+                        .get()
+                        .then((doc) {
+                          if (doc.exists) {
+                            return doc['name'] ?? 'Student';
+                          } else {
+                            return 'Student';
+                          }
+                        }),
+                    builder: (context, snapshot) {
+                      String displayName = snapshot.data ?? 'Student';
+                      return AnimatedOpacity(
+                        opacity:
+                            snapshot.connectionState == ConnectionState.done
+                            ? 1.0
+                            : 0.0,
+                        duration: const Duration(milliseconds: 600),
+                        child: Text(
+                          "Welcome $displayName",
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 20),
                   const SizedBox(height: 20),
                   Expanded(child: _dashboardGrid()),
@@ -97,12 +138,12 @@ class _TeacherDashboardState extends State<TeacherDashboard>
   Widget _header() {
     return Row(
       children: const [
-        Icon(Icons.school, size: 40, color: Colors.white),
+        Icon(Icons.dashboard_sharp, size: 40, color: Colors.cyan),
         SizedBox(width: 10),
         Text(
           "Teacher Dashboard",
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.cyan,
             fontSize: 26,
             fontWeight: FontWeight.bold,
           ),
@@ -148,16 +189,6 @@ class _TeacherDashboardState extends State<TeacherDashboard>
           color: Colors.teal,
           onTap: () => Navigator.pushNamed(context, AppRoutes.monthlysummary),
         ),
-        if (widget.role == "admin")
-          _dashboardCard(
-            icon: Icons.admin_panel_settings,
-            title: "Admin Panel",
-            color: Colors.redAccent,
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminPanel()),
-            ),
-          ),
       ],
     );
   }

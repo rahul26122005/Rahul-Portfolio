@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 import 'package:my_flutter_webside/Attendance/widgets/dashbordcard.dart';
@@ -14,6 +16,8 @@ class StudentDashboard extends StatefulWidget {
 class _StudentDashboardState extends State<StudentDashboard>
     with SingleTickerProviderStateMixin {
   bool _isDarkMode = true;
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
 
   // ================= THEME =================
   void _toggleTheme(bool value) {
@@ -37,24 +41,33 @@ class _StudentDashboardState extends State<StudentDashboard>
 
   @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('swap')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
       body: Stack(
@@ -81,20 +94,39 @@ class _StudentDashboardState extends State<StudentDashboard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Welcome ",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Student Dashboard",
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
-                    ),
+                    _header(),
                     const SizedBox(height: 30),
+                    FutureBuilder<String>(
+                      future: _firestore
+                          .collection('users')
+                          .doc(user?.uid)
+                          .get()
+                          .then((doc) {
+                            if (doc.exists) {
+                              return doc['name'] ?? 'Student';
+                            } else {
+                              return 'Student';
+                            }
+                          }),
+                      builder: (context, snapshot) {
+                        String displayName = snapshot.data ?? 'Student';
+                        return AnimatedOpacity(
+                          opacity:
+                              snapshot.connectionState == ConnectionState.done
+                              ? 1.0
+                              : 0.0,
+                          duration: const Duration(milliseconds: 600),
+                          child: Text(
+                            "Welcome $displayName",
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
 
                     /// Attendance Card
                     DashboardCard(
@@ -130,6 +162,24 @@ class _StudentDashboardState extends State<StudentDashboard>
           ),
         ],
       ),
+    );
+  }
+
+  // HEADER
+  Widget _header() {
+    return Row(
+      children: const [
+        Icon(Icons.cabin_outlined, size: 40, color: Colors.cyan),
+        SizedBox(width: 10),
+        Text(
+          "Student Dashboard",
+          style: TextStyle(
+            color: Colors.cyan,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

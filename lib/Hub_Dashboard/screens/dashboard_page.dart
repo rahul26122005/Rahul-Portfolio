@@ -66,7 +66,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
       body: Column(
         children: [
-          // 🔍 SEARCH BAR
+          // SEARCH BAR
           Padding(
             padding: const EdgeInsets.all(12),
             child: TextField(

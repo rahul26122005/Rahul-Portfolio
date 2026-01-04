@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
 class DashboardCard extends StatelessWidget {
   final String title;
@@ -29,10 +30,7 @@ class DashboardCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: [
-                Colors.blue.withValues(alpha: 0.2),
-                Colors.green.withValues(alpha: 0.6),
-              ],
+              colors: [Colors.blue, Colors.green],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -54,10 +52,7 @@ class DashboardCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(color: Colors.white70),
-                    ),
+                    Text(subtitle, style: const TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
@@ -67,6 +62,71 @@ class DashboardCard extends StatelessWidget {
                 size: 18,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GlassDashboardCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String image;
+  final VoidCallback onTap;
+
+  const GlassDashboardCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.image,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 120,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withOpacity(0.15),
+              border: Border.all(color: Colors.white30),
+            ),
+            child: Row(
+              children: [
+                Image.asset(image, height: 50),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

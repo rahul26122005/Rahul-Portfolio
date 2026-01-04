@@ -16,7 +16,6 @@ class _AttendancePageState extends State<AttendancePage> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   bool _isDarkMode = true;
 
-
   // ================= THEME =================
   void _toggleTheme(bool value) {
     if (!mounted) return;
@@ -121,31 +120,57 @@ class _AttendancePageState extends State<AttendancePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Attendance Management System",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            color: Colors.white,
-            fontFeatures: [FontFeature.enable('smcp')],
-            fontStyle: FontStyle.italic,
-
-            shadows: [
-              Shadow(offset: Offset(2, 2), blurRadius: 10, color: Colors.black),
-            ],
-          ),
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
         ),
         centerTitle: true,
-        backgroundColor: Color(0xFF1E3C72),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
       // appBar: AppBar(title: const Text("Mark Attendance")),
       body: Column(
         children: [
+          _header(),
+          const SizedBox(height: 20),
           _classSectionSelector(),
           Expanded(child: _studentList()),
         ],
       ),
+    );
+  }
+
+  Widget _header() {
+    return Row(
+      children: const [
+        Icon(Icons.check_circle, size: 40, color: Colors.cyan),
+        SizedBox(width: 10),
+        Text(
+          "Mark Attendance",
+          style: TextStyle(
+            color: Colors.cyan,
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 

@@ -209,11 +209,21 @@ class _SignupScreenState extends State<SignupScreen> {
 
                         const SizedBox(height: 16),
 
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text("Already have an account? Sign In"),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Already have an account?",
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pushNamed(
+                                context,
+                                '/attendance/login',
+                              ),
+                              child: const Text("Sign In"),
+                            ),
+                          ],
                         ),
                       ],
                     ),
