@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class StudentReportPage extends StatefulWidget {
   const StudentReportPage({super.key});
@@ -48,6 +49,12 @@ class _StudentReportPageState extends State<StudentReportPage>
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.studentDashboard);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -69,10 +76,29 @@ class _StudentReportPageState extends State<StudentReportPage>
             );
           },
         ),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.studentDashboard);
+            },
+            icon: Icon(Icons.home, color: Colors.white),
+          ),
+        ],
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
-      // appBar: AppBar(title: const Text("Attendance Report"), centerTitle: true),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: FadeTransition(
         opacity: _fade,
         child: FutureBuilder<DocumentSnapshot>(
@@ -217,24 +243,6 @@ class _StudentReportPageState extends State<StudentReportPage>
       ),
     );
   }
-
-  // HEADER
-  // Widget _header() {
-  //   return Row(
-  //     children: const [
-  //       Icon(Icons.cabin_outlined, size: 40, color: Colors.cyan),
-  //       SizedBox(width: 10),
-  //       Text(
-  //         "Student Dashboard",
-  //         style: TextStyle(
-  //           color: Colors.cyan,
-  //           fontSize: 26,
-  //           fontWeight: FontWeight.bold,
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 
   /// 👤 STUDENT HEADER
   Widget _studentHeader(Map<String, dynamic> s) {

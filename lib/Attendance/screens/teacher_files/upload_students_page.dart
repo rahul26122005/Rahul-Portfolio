@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class UploadStudentsPage extends StatefulWidget {
   const UploadStudentsPage({super.key});
@@ -33,6 +34,29 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
+            },
+            icon: Icon(Icons.home, color: Colors.white),
+          ),
+        ],
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -54,10 +78,12 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
             );
           },
         ),
-        centerTitle: true,
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,

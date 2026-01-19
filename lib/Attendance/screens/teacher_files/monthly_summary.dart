@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class MonthlySummaryPage extends StatefulWidget {
   const MonthlySummaryPage({super.key});
@@ -11,6 +13,13 @@ class MonthlySummaryPage extends StatefulWidget {
 
 class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  bool _isDarkMode = true;
+
+  // ================= THEME =================
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
+  }
 
   // Selection
   String? selectedClass;
@@ -88,7 +97,57 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
     final percent = total == 0 ? 0 : ((p + od + (hd * 0.5)) / total) * 100;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Monthly Attendance Summary")),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
+            },
+            icon: Icon(Icons.home, color: Colors.white),
+          ),
+        ],
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "Attendance Management System",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        backgroundColor: const Color(0xFF1E3C72),
+      ),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -50,6 +50,18 @@ class _TeacherDashboardState extends State<TeacherDashboard>
     final user = _auth.currentUser;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -71,10 +83,12 @@ class _TeacherDashboardState extends State<TeacherDashboard>
             );
           },
         ),
-        centerTitle: true,
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: FadeTransition(
         opacity: _fadeAnm,
         child: Container(

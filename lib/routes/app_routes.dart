@@ -14,7 +14,6 @@ class AppRoutes {
   static const String forgotPassword = '/attendance/forgot_password';
 
   static const String teacherDashboard = '/attendance/teacher/dashboard';
-  static const String adminDashboard = '/admin/dashboard';
   static const String guestDashboard = '/attendance/guest/dashboard';
 
   static const String uploadStudents = '/attendance/teacher/upload_students';
@@ -24,6 +23,7 @@ class AppRoutes {
   static const String monthlysummary = '/attendance/teacher/monthly_summary';
 
   static const String studentDashboard = '/attendance/student/dashboard';
+  static const String studentMark = '/attendance/student/allsubMarks';
   static const String studentReport = '/attendance/student/report';
 
   static const String adminPanel = '/admin/panel';
@@ -48,10 +48,6 @@ class AppRoutes {
       child: const TeacherDashboard(role: 'teacher'),
     ),
 
-    adminDashboard: (context) => RoleGuard(
-      allowedRoles: const ['admin'],
-      child: const TeacherDashboard(role: 'admin'),
-    ),
 
     uploadStudents: (context) => RoleGuard(
       allowedRoles: const ['teacher', 'admin'],
@@ -79,12 +75,15 @@ class AppRoutes {
 
     // ---------- STUDENT ----------
     studentDashboard: (context) => RoleGuard(
-      allowedRoles: const ['student'],
+      allowedRoles: const ['student', 'admin'],
       child: const StudentDashboard(),
     ),
-
+    studentMark: (context) => RoleGuard(
+      allowedRoles: const ['student', 'admin'],
+      child: const StudentMarkPage(),
+    ),
     studentReport: (context) => RoleGuard(
-      allowedRoles: const ['student'],
+      allowedRoles: const ['student', 'admin'],
       child: const StudentReportPage(),
     ),
 

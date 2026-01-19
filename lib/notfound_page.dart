@@ -66,7 +66,7 @@ class _NotFoundPageState extends State<NotFoundPage> {
 
           Center(
             child: Text(
-              'Failed to load profile.\nPlease contact admin.\n G-mail: biomed.rahulr1201@gmail.com',
+              'Failed to load profile.\nPlease contact admin.\n\n G-mail: biomed.rahulr1201@gmail.com',
               textAlign: TextAlign.center,
             ),
           ),

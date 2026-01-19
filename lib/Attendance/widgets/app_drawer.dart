@@ -61,6 +61,10 @@ class _DrawerPageState extends State<DrawerPage> {
     }
 
     return Drawer(
+      backgroundColor: const Color.fromARGB(255, 112, 47, 47),
+      shadowColor: Colors.greenAccent,
+
+      shape: Border.all(color: Colors.black, style: BorderStyle.solid),
       child: StreamBuilder<DocumentSnapshot>(
         stream: _firestore.collection('users').doc(user.uid).snapshots(),
         builder: (context, snapshot) {
@@ -163,7 +167,7 @@ class _DrawerPageState extends State<DrawerPage> {
                 _menuTile(
                   icon: Icons.assignment,
                   title: 'Marks Report',
-                  onTap: () => _navigate(AppRoutes.studentReport),
+                  onTap: () => _navigate(AppRoutes.studentMark),
                 ),
                 const Divider(),
               ],

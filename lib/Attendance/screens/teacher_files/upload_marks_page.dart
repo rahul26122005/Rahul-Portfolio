@@ -4,6 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class UploadMarksPage extends StatefulWidget {
   const UploadMarksPage({super.key});
@@ -26,6 +27,7 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
 
   String? selectedClass;
   String? selectedSection;
+  String? examType;
 
   PlatformFile? excelFile;
   bool isUploading = false;
@@ -79,7 +81,8 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
         title: const Text("Confirm Upload"),
         content: Text(
           "Class: $selectedClass\n"
-          "Section: $selectedSection\n\n"
+          "Section: $selectedSection\n"
+          "ExamType: $examType\n\n"
           "File: ${excelFile!.name}\n\n"
           "Proceed with marks upload?",
         ),
@@ -170,7 +173,6 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
             .collection('marks')
             .where('studentId', isEqualTo: student.id)
             .where('subjectId', isEqualTo: subjectRef.id)
-            .limit(1)
             .get();
 
         if (markSnap.docs.isNotEmpty) {
@@ -186,6 +188,7 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
             'section': selectedSection,
             'subjectId': subjectRef.id,
             'subject': subjectName,
+            'ExamType': examType,
             'marks': marks,
             'teacherId': _auth.currentUser!.uid,
             'createdAt': FieldValue.serverTimestamp(),
@@ -212,7 +215,6 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
         .collection('subjects')
         .where('name', isEqualTo: name)
         .where('class', isEqualTo: className)
-        .limit(1)
         .get();
 
     if (snap.docs.isNotEmpty) return snap.docs.first.reference;
@@ -230,6 +232,12 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -251,10 +259,29 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
             );
           },
         ),
-        centerTitle: true,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
+            },
+            icon: Icon(Icons.home, color: Colors.white),
+          ),
+        ],
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: Column(
         children: [
           _header(),
@@ -374,9 +401,13 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
                     );
                   },
                 ),
+              const SizedBox(height: 9),
+              _examtype(),
               const SizedBox(height: 12),
               ElevatedButton.icon(
-                onPressed: selectedSection == null ? null : _pickExcel,
+                onPressed: examType == null || selectedSection == null
+                    ? null
+                    : _pickExcel,
                 icon: const Icon(Icons.upload_file),
                 label: const Text("Choose Excel File"),
               ),
@@ -384,6 +415,44 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // ================= SELECTORS =================
+  Widget _examtype() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _dropdown(
+                "Exam Type",
+                ["Internal", "Model", "Semester"],
+                examType,
+                (v) => setState(() => examType = v),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdown(
+    String label,
+    List<String> items,
+    String? value,
+    ValueChanged<String?> onChanged,
+  ) {
+    return DropdownButtonFormField<String>(
+      initialValue: value,
+      decoration: InputDecoration(labelText: label),
+      items: items
+          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+          .toList(),
+      onChanged: onChanged,
     );
   }
 }

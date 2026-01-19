@@ -9,4 +9,5 @@ export 'teacher_files/teacher_dashboard.dart';
 export 'teacher_files/monthly_summary.dart';
 export 'students_files/student_dashboard.dart';
 export 'students_files/student_report_page.dart';
+export 'Students_files/student_mark_page.dart';
 export 'teacher_files/attendance_report_generate_page.dart';

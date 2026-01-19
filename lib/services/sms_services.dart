@@ -1,20 +1,27 @@
-import 'package:cloud_functions/cloud_functions.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:my_flutter_webside/services/api_service.dart';
 
 class SmsService {
-  static final _functions = FirebaseFunctions.instance;
-
   static Future<void> sendAbsentSMS({
     required String mobile,
     required String studentName,
     required String date,
   }) async {
-    final callable =
-        _functions.httpsCallable('sendAbsentSMS');
+    final url = Uri.parse("${ApiConfig.localBaseUrl}/send-absent-sms");
 
-    await callable.call({
-      'mobile': mobile,
-      'studentName': studentName,
-      'date': date,
-    });
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "mobile": mobile,
+        "studentName": studentName,
+        "date": date,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("SMS Failed: ${response.body}");
+    }
   }
 }

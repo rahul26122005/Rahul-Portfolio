@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-//import '/services/sms_services.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
+//import 'package:my_flutter_webside/services/sms_services.dart';
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({super.key});
@@ -57,69 +58,189 @@ class _AttendancePageState extends State<AttendancePage> {
         attendanceState.values.every((v) => v != null);
   }
 
-  // ================= SUBMIT =================
   Future<void> _submitAttendance(List<QueryDocumentSnapshot> students) async {
-    try {
-      if (!_isValid(students.length)) {
-        _showMsg("Please mark attendance for all students", error: true);
-        return;
-      }
-    } catch (e) {
-      _showMsg("Error: $e", error: true);
-      return;
-    }
-
     setState(() => isSubmitting = true);
 
     try {
       final classSectionId = "$selectedClass-$selectedSection";
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      final Map<String, String> records = {};
-
-      for (final s in students) {
-        final regNo = s['registerNo'].toString();
-        records[regNo] = attendanceState[regNo]!;
-      }
-
-      await _db
+      final docRef = _db
           .collection('attendance')
           .doc(classSectionId)
           .collection(month)
-          .doc(date)
-          .set({
-            'class': selectedClass,
-            'section': selectedSection,
-            'records': records,
-            'submittedBy': uid,
-            'submittedAt': FieldValue.serverTimestamp(),
-          });
+          .doc(date);
 
-      /// Send SMS only for ABSENT
-      /*for (final s in students) {
-        final regNo = s['registerNo'].toString();
-        if (attendanceState[regNo] == "A") {
-          await SmsService.sendAbsentSMS(
-            mobile: s['fatherMobile'],
-            studentName: s['name'],
-            date: date,
-          );
+      // Check if attendance already exists (Edit mode)
+      final docSnap = await docRef.get();
+      final bool isEditMode = docSnap.exists;
+
+      /// ---------------- VALIDATION ----------------
+      if (!isEditMode) {
+        //  FIRST TIME SUBMISSION → MUST MARK ALL
+        if (!_isValid(students.length)) {
+          _showMsg("Please mark attendance for all students", error: true);
+          setState(() => isSubmitting = false);
+          return;
         }
-      }*/
+      }
 
-      _showMsg("Attendance saved successfully");
+      /// ---------------- BUILD RECORDS ----------------
+      final Map<String, String> newRecords = {};
+
+      for (final s in students) {
+        final regNo = s['registerNo'].toString();
+
+        // Only take marked values during edit
+        if (attendanceState.containsKey(regNo) &&
+            attendanceState[regNo] != null) {
+          newRecords[regNo] = attendanceState[regNo]!;
+        }
+      }
+
+      /// ---------------- MERGE WITH OLD DATA ----------------
+      Map<String, String> finalRecords = {};
+
+      if (isEditMode) {
+        //  Edit Mode → merge old + new
+        final oldRecords = Map<String, String>.from(docSnap['records'] ?? {});
+        finalRecords = {...oldRecords, ...newRecords};
+      } else {
+        // New submission
+        finalRecords = newRecords;
+      }
+
+      /// ---------------- SAVE TO FIRESTORE ----------------
+      await docRef.set({
+        'class': selectedClass,
+        'section': selectedSection,
+        'records': finalRecords,
+        'submittedBy': uid,
+        'submittedAt': FieldValue.serverTimestamp(),
+        'isEdited': isEditMode,
+      }, SetOptions(merge: true));
+
+      ///  Send SMS only for ABSENT students
+      // for (final s in students) {
+      //   final regNo = s['registerNo'].toString();
+
+      //   if (attendanceState[regNo] == "A") {
+      //     final mobile = s['fatherMobile']?.toString().trim();
+
+      //     // Validate mobile number
+      //     if (mobile == null || mobile.length != 10) {
+      //       debugPrint("Invalid mobile for $regNo");
+      //       continue;
+      //     }
+
+      //     try {
+      //       await SmsService.sendAbsentSMS(
+      //         mobile: mobile,
+      //         studentName: s['name'].toString(),
+      //         date: date,
+      //       );
+      //     } catch (e) {
+      //       //  Never break attendance submission
+      //       _showMsg(" SMS failed for $regNo : $e", error: true);
+      //     }
+      //   }
+      // }
+
+      _showMsg(
+        isEditMode
+            ? "Attendance updated successfully"
+            : "Attendance submitted successfully",
+      );
     } catch (e) {
-      _showMsg("Submission failed $e", error: true);
+      _showMsg("Submission failed: $e", error: true);
     }
 
     setState(() => isSubmitting = false);
   }
+
+  // // ================= SUBMIT =================
+  // Future<void> _submitAttendance(List<QueryDocumentSnapshot> students) async {
+  //   try {
+  //     if (!_isValid(students.length)) {
+  //       _showMsg("Please mark attendance for all students", error: true);
+  //       return;
+  //     }
+  //   } catch (e) {
+  //     _showMsg("Error: $e", error: true);
+  //     return;
+  //   }
+
+  //   setState(() => isSubmitting = true);
+
+  //   try {
+  //     final classSectionId = "$selectedClass-$selectedSection";
+  //     final uid = FirebaseAuth.instance.currentUser!.uid;
+
+  //     final Map<String, String> records = {};
+
+  //     for (final s in students) {
+  //       final regNo = s['registerNo'].toString();
+  //       records[regNo] = attendanceState[regNo]!;
+  //     }
+
+  //     await _db
+  //         .collection('attendance')
+  //         .doc(classSectionId)
+  //         .collection(month)
+  //         .doc(date)
+  //         .set({
+  //           'class': selectedClass,
+  //           'section': selectedSection,
+  //           'records': records,
+  //           'submittedBy': uid,
+  //           'submittedAt': FieldValue.serverTimestamp(),
+  //         });
+
+  //     ///  Send SMS only for ABSENT students
+  //     // for (final s in students) {
+  //     //   final regNo = s['registerNo'].toString();
+
+  //     //   if (attendanceState[regNo] == "A") {
+  //     //     final mobile = s['fatherMobile']?.toString().trim();
+
+  //     //     // Validate mobile number
+  //     //     if (mobile == null || mobile.length != 10) {
+  //     //       debugPrint("Invalid mobile for $regNo");
+  //     //       continue;
+  //     //     }
+
+  //     //     try {
+  //     //       await SmsService.sendAbsentSMS(
+  //     //         mobile: mobile,
+  //     //         studentName: s['name'].toString(),
+  //     //         date: date,
+  //     //       );
+  //     //     } catch (e) {
+  //     //       //  Never break attendance submission
+  //     //       _showMsg(" SMS failed for $regNo : $e", error: true);
+  //     //     }
+  //     //   }
+  //     // }
+
+  //     _showMsg("Attendance saved successfully");
+  //   } catch (e) {
+  //     _showMsg("Submission failed $e", error: true);
+  //   }
+
+  //   setState(() => isSubmitting = false);
+  // }
 
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
+          },
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+        ),
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -141,11 +262,30 @@ class _AttendancePageState extends State<AttendancePage> {
             );
           },
         ),
-        centerTitle: true,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
+            },
+            icon: Icon(Icons.home, color: Colors.white),
+          ),
+        ],
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
-      // appBar: AppBar(title: const Text("Mark Attendance")),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
+
       body: Column(
         children: [
           _header(),

@@ -33,7 +33,7 @@ class _StudentDashboardState extends State<StudentDashboard>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 800),
+      duration: const Duration(milliseconds: 200),
     );
     _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
@@ -45,6 +45,18 @@ class _StudentDashboardState extends State<StudentDashboard>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
@@ -66,10 +78,12 @@ class _StudentDashboardState extends State<StudentDashboard>
             );
           },
         ),
-        centerTitle: true,
         backgroundColor: const Color(0xFF1E3C72),
       ),
-      drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -115,7 +129,7 @@ class _StudentDashboardState extends State<StudentDashboard>
                               snapshot.connectionState == ConnectionState.done
                               ? 1.0
                               : 0.0,
-                          duration: const Duration(milliseconds: 600),
+                          duration: const Duration(milliseconds: 200),
                           child: Text(
                             "Welcome $displayName",
                             style: const TextStyle(
@@ -148,11 +162,7 @@ class _StudentDashboardState extends State<StudentDashboard>
                       image: 'assets/images/attendance_icon.png',
                       color: Colors.orange,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Marks module coming soon"),
-                          ),
-                        );
+                        Navigator.pushNamed(context, AppRoutes.studentMark);
                       },
                     ),
                   ],

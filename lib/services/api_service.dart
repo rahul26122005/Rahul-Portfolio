@@ -2,17 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String _baseUrl =
-      'https://your-api.onrender.com/predict';
+  static const String _baseUrl = 'https://your-api.onrender.com/predict';
 
   Future<String> predict(Map<String, dynamic> input) async {
     try {
       final response = await http
           .post(
             Uri.parse(_baseUrl),
-            headers: const {
-              'Content-Type': 'application/json',
-            },
+            headers: const {'Content-Type': 'application/json'},
             body: jsonEncode(input),
           )
           .timeout(const Duration(seconds: 15));
@@ -21,12 +18,23 @@ class ApiService {
         final data = jsonDecode(response.body);
         return data['result'].toString();
       } else {
-        throw Exception(
-          'Server error: ${response.statusCode}',
-        );
+        throw Exception('Server error: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Prediction failed: $e');
     }
   }
+}
+
+class ApiConfig {
+  /// LOCAL (only for testing)
+  static const String localBaseUrl = "http://127.0.0.1:5000";
+
+  /// PRODUCTION (Render / Railway / VPS)
+  static const String prodBaseUrl = "https://your-python-service.onrender.com";
+
+  /// SWITCH HERE
+  static const bool isProd = true;
+
+  static String get baseUrl => isProd ? prodBaseUrl : localBaseUrl;
 }

@@ -39,7 +39,7 @@ class AuthService {
       } else if (role == 'guest') {
         Navigator.pushReplacementNamed(context, AppRoutes.guestDashboard);
       } else if (role == 'admin') {
-        Navigator.pushReplacementNamed(context, AppRoutes.adminDashboard);
+        Navigator.pushReplacementNamed(context, AppRoutes.adminPanel);
       } else {
         _showUnauthorizedDialog(context);
         await logout();
