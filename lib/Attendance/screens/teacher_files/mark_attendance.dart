@@ -158,78 +158,6 @@ class _AttendancePageState extends State<AttendancePage> {
     setState(() => isSubmitting = false);
   }
 
-  // // ================= SUBMIT =================
-  // Future<void> _submitAttendance(List<QueryDocumentSnapshot> students) async {
-  //   try {
-  //     if (!_isValid(students.length)) {
-  //       _showMsg("Please mark attendance for all students", error: true);
-  //       return;
-  //     }
-  //   } catch (e) {
-  //     _showMsg("Error: $e", error: true);
-  //     return;
-  //   }
-
-  //   setState(() => isSubmitting = true);
-
-  //   try {
-  //     final classSectionId = "$selectedClass-$selectedSection";
-  //     final uid = FirebaseAuth.instance.currentUser!.uid;
-
-  //     final Map<String, String> records = {};
-
-  //     for (final s in students) {
-  //       final regNo = s['registerNo'].toString();
-  //       records[regNo] = attendanceState[regNo]!;
-  //     }
-
-  //     await _db
-  //         .collection('attendance')
-  //         .doc(classSectionId)
-  //         .collection(month)
-  //         .doc(date)
-  //         .set({
-  //           'class': selectedClass,
-  //           'section': selectedSection,
-  //           'records': records,
-  //           'submittedBy': uid,
-  //           'submittedAt': FieldValue.serverTimestamp(),
-  //         });
-
-  //     ///  Send SMS only for ABSENT students
-  //     // for (final s in students) {
-  //     //   final regNo = s['registerNo'].toString();
-
-  //     //   if (attendanceState[regNo] == "A") {
-  //     //     final mobile = s['fatherMobile']?.toString().trim();
-
-  //     //     // Validate mobile number
-  //     //     if (mobile == null || mobile.length != 10) {
-  //     //       debugPrint("Invalid mobile for $regNo");
-  //     //       continue;
-  //     //     }
-
-  //     //     try {
-  //     //       await SmsService.sendAbsentSMS(
-  //     //         mobile: mobile,
-  //     //         studentName: s['name'].toString(),
-  //     //         date: date,
-  //     //       );
-  //     //     } catch (e) {
-  //     //       //  Never break attendance submission
-  //     //       _showMsg(" SMS failed for $regNo : $e", error: true);
-  //     //     }
-  //     //   }
-  //     // }
-
-  //     _showMsg("Attendance saved successfully");
-  //   } catch (e) {
-  //     _showMsg("Submission failed $e", error: true);
-  //   }
-
-  //   setState(() => isSubmitting = false);
-  // }
-
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
@@ -411,6 +339,7 @@ class _AttendancePageState extends State<AttendancePage> {
           .collection('students')
           .where('class', isEqualTo: selectedClass)
           .where('section', isEqualTo: selectedSection)
+          .orderBy('registerNo')
           .get(),
       builder: (_, snap) {
         if (!snap.hasData) {

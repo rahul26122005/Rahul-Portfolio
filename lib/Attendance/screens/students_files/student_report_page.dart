@@ -206,20 +206,42 @@ class _StudentReportPageState extends State<StudentReportPage>
                             final records =
                                 data['records'] as Map<String, dynamic>? ?? {};
 
-                            final bool isPresent = records[registerNo] == true;
-
-                            if (isPresent) present++;
-
+                            final status = (records[registerNo] ?? '')
+                                .toString()
+                                .toUpperCase();
+                            if (status == 'P' || status == 'OD') {
+                              present += 1;
+                            } else if (status == 'HD') {
+                              present += 0.5.toInt();
+                            }
                             return ListTile(
                               leading: Icon(
-                                isPresent ? Icons.check_circle : Icons.cancel,
-                                color: isPresent ? Colors.green : Colors.red,
+                                status == 'P' ||
+                                        status == 'OD' ||
+                                        status == 'HD'
+                                    ? Icons.check_circle
+                                    : Icons.cancel,
+                                color:
+                                    status == 'P' ||
+                                        status == 'OD' ||
+                                        status == 'HD'
+                                    ? Colors.green
+                                    : Colors.red,
                               ),
                               title: Text(doc.id),
                               trailing: Text(
-                                isPresent ? "Present" : "Absent",
+                                status == 'P' ||
+                                        status == 'OD' ||
+                                        status == 'HD'
+                                    ? "Present"
+                                    : "Absent",
                                 style: TextStyle(
-                                  color: isPresent ? Colors.green : Colors.red,
+                                  color:
+                                      status == 'P' ||
+                                          status == 'OD' ||
+                                          status == 'HD'
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                               ),
                             );
