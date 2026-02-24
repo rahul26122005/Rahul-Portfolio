@@ -19,29 +19,23 @@ class AttendanceReportGeneratePage extends StatefulWidget {
 
 class _AttendanceReportGeneratePageState
     extends State<AttendanceReportGeneratePage> {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-  bool _isDarkMode = true;
 
-  // ================= THEME =================
-  void _toggleTheme(bool value) {
-    if (!mounted) return;
-    setState(() => _isDarkMode = value);
-  }
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  bool _isDarkMode = true;
+  bool loading = false;
 
   String? selectedClass;
   String? selectedSection;
+
   int selectedMonth = DateTime.now().month;
   int selectedYear = DateTime.now().year;
-
-  bool loading = false;
 
   List<String> classes = [];
   List<String> sections = [];
 
-  /// Optional manual holidays
   final Map<DateTime, String> manualHolidays = {};
 
-  // ================= INIT =================
   @override
   void initState() {
     super.initState();
@@ -68,6 +62,7 @@ class _AttendanceReportGeneratePageState
         .get();
 
     final set = <String>{};
+
     for (var d in snap.docs) {
       set.add(d['section']);
     }
@@ -80,8 +75,9 @@ class _AttendanceReportGeneratePageState
 
   // ================= GENERATE REPORT =================
   Future<void> generateReport() async {
+
     if (selectedClass == null || selectedSection == null) {
-      _msg("Select class & section");
+      _showMessage("Select class & section");
       return;
     }
 
@@ -91,9 +87,11 @@ class _AttendanceReportGeneratePageState
       final classSection = "$selectedClass-$selectedSection";
       final monthKey =
           "$selectedYear-${selectedMonth.toString().padLeft(2, '0')}";
-      final daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
 
-      // ---------- STUDENTS ----------
+      final daysInMonth =
+          DateTime(selectedYear, selectedMonth + 1, 0).day;
+
+      // ---------- FETCH STUDENTS ----------
       final studentsSnap = await _db
           .collection('students')
           .where('class', isEqualTo: selectedClass)
@@ -102,7 +100,7 @@ class _AttendanceReportGeneratePageState
           .get();
 
       if (studentsSnap.docs.isEmpty) {
-        _msg("No students found");
+        _showMessage("No students found");
         return;
       }
 
@@ -115,7 +113,7 @@ class _AttendanceReportGeneratePageState
         attendanceMap[regNo] = {};
       }
 
-      // ---------- ATTENDANCE ----------
+      // ---------- FETCH ATTENDANCE ----------
       final attSnap = await _db
           .collection('attendance')
           .doc(classSection)
@@ -124,6 +122,7 @@ class _AttendanceReportGeneratePageState
 
       for (var d in attSnap.docs) {
         DateTime date;
+
         try {
           date = DateFormat('yyyy-MM-dd').parse(d.id);
         } catch (_) {
@@ -131,8 +130,6 @@ class _AttendanceReportGeneratePageState
         }
 
         final day = date.day;
-
-        /// ✅ FIX: read from "records"
         final records = Map<String, dynamic>.from(d['records']);
 
         for (final regNo in records.keys) {
@@ -141,7 +138,7 @@ class _AttendanceReportGeneratePageState
         }
       }
 
-      // ---------- EXCEL ----------
+      // ---------- CREATE EXCEL ----------
       final excel = Excel.createExcel();
       final sheet = excel['Attendance'];
 
@@ -175,8 +172,9 @@ class _AttendanceReportGeneratePageState
 
       sheet.appendRow(header);
 
-      // Rows
+      // ---------- FILL ROWS ----------
       attendanceMap.forEach((regNo, daily) {
+
         double total = 0;
         int validDays = 0;
         int p = 0, a = 0, od = 0, hd = 0;
@@ -187,6 +185,7 @@ class _AttendanceReportGeneratePageState
         ];
 
         for (int d = 1; d <= daysInMonth; d++) {
+
           final date = DateTime(selectedYear, selectedMonth, d);
 
           if (date.weekday == DateTime.sunday ||
@@ -195,31 +194,18 @@ class _AttendanceReportGeneratePageState
             continue;
           }
 
-          final v = daily[d] ?? "A";
-          final cell = TextCellValue(v);
-          final cellIndex = row.length;
-
-          row.add(cell);
-          sheet
-              .cell(
-                CellIndex.indexByColumnRow(
-                  columnIndex: cellIndex,
-                  rowIndex: sheet.maxRows,
-                ),
-              )
-              .cellStyle = styleFor(
-            v,
-          );
+          final value = daily[d] ?? "A";
+          row.add(TextCellValue(value));
 
           validDays++;
 
-          if (v == "P") {
+          if (value == "P") {
             p++;
             total += 1;
-          } else if (v == "OD") {
+          } else if (value == "OD") {
             od++;
             total += 1;
-          } else if (v == "HD") {
+          } else if (value == "HD") {
             hd++;
             total += 0.5;
           } else {
@@ -227,38 +213,44 @@ class _AttendanceReportGeneratePageState
           }
         }
 
-        final percent = validDays == 0 ? 0 : (total / validDays) * 100;
+        final percent =
+            validDays == 0 ? 0 : (total / validDays) * 100;
 
         row.addAll([
           IntCellValue(p),
           IntCellValue(a),
           IntCellValue(od),
           IntCellValue(hd),
-          DoubleCellValue(double.parse(percent.toStringAsFixed(2))),
+          DoubleCellValue(
+              double.parse(percent.toStringAsFixed(2))),
         ]);
 
         sheet.appendRow(row);
       });
 
       final bytes = Uint8List.fromList(excel.encode()!);
-      final fileName = "Attendance_${classSection}_$monthKey.xlsx";
+      final fileName =
+          "Attendance_${classSection}_$monthKey.xlsx";
 
       // ---------- DOWNLOAD ----------
       if (kIsWeb) {
         final blob = html.Blob([bytes]);
         final url = html.Url.createObjectUrlFromBlob(blob);
+
         html.AnchorElement(href: url)
           ..download = fileName
           ..click();
+
         html.Url.revokeObjectUrl(url);
       } else {
         final dir = await getApplicationDocumentsDirectory();
         final file = File("${dir.path}/$fileName");
         await file.writeAsBytes(bytes);
-        _msg("Saved to ${file.path}");
+        _showMessage("Saved to ${file.path}");
       }
+
     } catch (e) {
-      _msg("Failed: $e");
+      _showMessage("Failed: $e");
     } finally {
       setState(() => loading = false);
     }
@@ -267,88 +259,70 @@ class _AttendanceReportGeneratePageState
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
-          },
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-        ),
-        actions: [
-          Builder(
-            builder: (context) => IconButton(
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-              icon: Icon(Icons.menu, color: Colors.white),
-              iconSize: 22,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
-            },
-            icon: Icon(Icons.home, color: Colors.white),
-          ),
-        ],
-        title: LayoutBuilder(
-          builder: (context, constraints) {
-            return Text(
-              "Attendance Management System",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: constraints.maxWidth < 600 ? 18 : 24,
-                color: Colors.white,
-                fontFeatures: const [FontFeature.enable('swap')],
-                fontStyle: FontStyle.italic,
-                shadows: const [
-                  Shadow(
-                    offset: Offset(2, 2),
-                    blurRadius: 10,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
         backgroundColor: const Color(0xFF1E3C72),
+        title: const Text(
+          "Attendance Management System",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            color: Colors.white,
+          ),
+        ),
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
-        onThemeChange: _toggleTheme,
+        onThemeChange: (val) {
+          setState(() => _isDarkMode = val);
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            _header(),
+
+            const Text(
+              "Report Generation",
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
             const SizedBox(height: 30),
+
             _dropdown("Class", selectedClass, classes, (v) {
               setState(() => selectedClass = v);
               _loadSections(v!);
             }),
+
             _dropdown(
               "Section",
               selectedSection,
               sections,
               (v) => setState(() => selectedSection = v),
             ),
+
             _dropdown(
               "Month",
               selectedMonth,
               List.generate(12, (i) => i + 1),
               (v) => setState(() => selectedMonth = v!),
-              display: (v) => DateFormat.MMMM().format(DateTime(0, v)),
+              display: (v) =>
+                  DateFormat.MMMM().format(DateTime(0, v)),
             ),
+
             _dropdown(
               "Year",
               selectedYear,
               List.generate(5, (i) => DateTime.now().year - i),
               (v) => setState(() => selectedYear = v!),
             ),
+
             const SizedBox(height: 30),
+
             loading
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton.icon(
@@ -359,23 +333,6 @@ class _AttendanceReportGeneratePageState
           ],
         ),
       ),
-    );
-  }
-
-  Widget _header() {
-    return Row(
-      children: const [
-        Icon(Icons.get_app_rounded, size: 40, color: Colors.cyan),
-        SizedBox(width: 10),
-        Text(
-          "Report Generation",
-          style: TextStyle(
-            color: Colors.cyan,
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
     );
   }
 
@@ -394,7 +351,11 @@ class _AttendanceReportGeneratePageState
             .map(
               (e) => DropdownMenuItem(
                 value: e,
-                child: Text(display != null ? display(e) : e.toString()),
+                child: Text(
+                  display != null
+                      ? display(e)
+                      : e.toString(),
+                ),
               ),
             )
             .toList(),
@@ -404,20 +365,8 @@ class _AttendanceReportGeneratePageState
     );
   }
 
-  void _msg(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _showMessage(String msg) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
   }
-}
-
-CellStyle styleFor(String v) {
-  return CellStyle(
-    backgroundColorHex: switch (v) {
-      "P" => ExcelColor.fromHexString("#C8E6C9"),
-      "A" => ExcelColor.fromHexString("#FFCDD2"),
-      "OD" => ExcelColor.fromHexString("#BBDEFB"),
-      "HD" => ExcelColor.fromHexString("#FFF9C4"),
-      "H" => ExcelColor.fromHexString("#E0E0E0"),
-      String() => throw UnimplementedError(),
-    },
-  );
 }
