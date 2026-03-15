@@ -1,17 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import 'manage_classes_page.dart';
 import 'manage_teachers_page.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 
-class AdminPanel extends StatelessWidget {
+class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
 
+  @override
+  State<AdminPanel> createState() => _AdminPanelState();
+}
+
+class _AdminPanelState extends State<AdminPanel> {
+  bool _isDarkMode = true;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Admin Panel"),
-        backgroundColor: Colors.redAccent,
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "AMS-Admin Panel",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        backgroundColor: const Color(0xFF1E3C72),
+      ),
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: (val) {
+          setState(() => _isDarkMode = val);
+        },
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -21,7 +67,7 @@ class AdminPanel extends StatelessWidget {
             title: "Manage Classes & Sections",
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const ManageClassesPage()),
+              MaterialPageRoute(builder: (_) => const ManageStudentsPage()),
             ),
           ),
           _adminTile(
@@ -29,7 +75,15 @@ class AdminPanel extends StatelessWidget {
             title: "Manage Teachers",
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const ManageTeachersPage()),
+              MaterialPageRoute(builder: (_) => const ManageUsersPage()),
+            ),
+          ),
+          _adminTile(
+            icon: Icons.people,
+            title: "Manage Attendance",
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ManageAttendancePage()),
             ),
           ),
         ],

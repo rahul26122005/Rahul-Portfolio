@@ -61,7 +61,7 @@ class _DrawerPageState extends State<DrawerPage> {
     }
 
     return Drawer(
-      backgroundColor: const Color.fromARGB(255, 112, 47, 47),
+      backgroundColor: const Color.fromARGB(255, 226, 220, 220),
       shadowColor: Colors.greenAccent,
 
       shape: Border.all(color: Colors.black, style: BorderStyle.solid),
@@ -121,6 +121,24 @@ class _DrawerPageState extends State<DrawerPage> {
                   ),
                 ],
               ),
+              if (role == 'admin') ...[
+                _menuTile(
+                  icon: Icons.admin_panel_settings,
+                  title: 'Admin Dashboard',
+                  onTap: () => _navigate(AppRoutes.adminPanel),
+                ),
+                _menuTile(
+                  icon: Icons.class_,
+                  title: 'Manage Students',
+                  onTap: () => _navigate(AppRoutes.manageClasses),
+                ),
+                _menuTile(
+                  icon: Icons.people_outline_rounded,
+                  title: 'Manage Teachers',
+                  onTap: () => _navigate(AppRoutes.manageTeachers),
+                ),
+                const Divider(),
+              ],
 
               // ================= ADMIN / TEACHER =================
               if (_isAdminOrTeacher(role)) ...[

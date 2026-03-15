@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/routes/app_routes.dart';
+//import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -19,7 +19,6 @@ class AttendanceReportGeneratePage extends StatefulWidget {
 
 class _AttendanceReportGeneratePageState
     extends State<AttendanceReportGeneratePage> {
-
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   bool _isDarkMode = true;
@@ -75,7 +74,6 @@ class _AttendanceReportGeneratePageState
 
   // ================= GENERATE REPORT =================
   Future<void> generateReport() async {
-
     if (selectedClass == null || selectedSection == null) {
       _showMessage("Select class & section");
       return;
@@ -88,8 +86,7 @@ class _AttendanceReportGeneratePageState
       final monthKey =
           "$selectedYear-${selectedMonth.toString().padLeft(2, '0')}";
 
-      final daysInMonth =
-          DateTime(selectedYear, selectedMonth + 1, 0).day;
+      final daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
 
       // ---------- FETCH STUDENTS ----------
       final studentsSnap = await _db
@@ -174,7 +171,6 @@ class _AttendanceReportGeneratePageState
 
       // ---------- FILL ROWS ----------
       attendanceMap.forEach((regNo, daily) {
-
         double total = 0;
         int validDays = 0;
         int p = 0, a = 0, od = 0, hd = 0;
@@ -185,7 +181,6 @@ class _AttendanceReportGeneratePageState
         ];
 
         for (int d = 1; d <= daysInMonth; d++) {
-
           final date = DateTime(selectedYear, selectedMonth, d);
 
           if (date.weekday == DateTime.sunday ||
@@ -213,24 +208,21 @@ class _AttendanceReportGeneratePageState
           }
         }
 
-        final percent =
-            validDays == 0 ? 0 : (total / validDays) * 100;
+        final percent = validDays == 0 ? 0 : (total / validDays) * 100;
 
         row.addAll([
           IntCellValue(p),
           IntCellValue(a),
           IntCellValue(od),
           IntCellValue(hd),
-          DoubleCellValue(
-              double.parse(percent.toStringAsFixed(2))),
+          DoubleCellValue(double.parse(percent.toStringAsFixed(2))),
         ]);
 
         sheet.appendRow(row);
       });
 
       final bytes = Uint8List.fromList(excel.encode()!);
-      final fileName =
-          "Attendance_${classSection}_$monthKey.xlsx";
+      final fileName = "Attendance_${classSection}_$monthKey.xlsx";
 
       // ---------- DOWNLOAD ----------
       if (kIsWeb) {
@@ -248,7 +240,6 @@ class _AttendanceReportGeneratePageState
         await file.writeAsBytes(bytes);
         _showMessage("Saved to ${file.path}");
       }
-
     } catch (e) {
       _showMessage("Failed: $e");
     } finally {
@@ -259,7 +250,6 @@ class _AttendanceReportGeneratePageState
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3C72),
@@ -282,13 +272,9 @@ class _AttendanceReportGeneratePageState
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-
             const Text(
               "Report Generation",
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 30),
@@ -310,8 +296,7 @@ class _AttendanceReportGeneratePageState
               selectedMonth,
               List.generate(12, (i) => i + 1),
               (v) => setState(() => selectedMonth = v!),
-              display: (v) =>
-                  DateFormat.MMMM().format(DateTime(0, v)),
+              display: (v) => DateFormat.MMMM().format(DateTime(0, v)),
             ),
 
             _dropdown(
@@ -351,11 +336,7 @@ class _AttendanceReportGeneratePageState
             .map(
               (e) => DropdownMenuItem(
                 value: e,
-                child: Text(
-                  display != null
-                      ? display(e)
-                      : e.toString(),
-                ),
+                child: Text(display != null ? display(e) : e.toString()),
               ),
             )
             .toList(),
@@ -366,7 +347,6 @@ class _AttendanceReportGeneratePageState
   }
 
   void _showMessage(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/screens/screens.dart';
 import 'package:my_flutter_webside/admin/admin_panel.dart';
+import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
 import 'package:my_flutter_webside/admin/manage_classes_page.dart';
 import 'package:my_flutter_webside/admin/manage_teachers_page.dart';
 import 'package:my_flutter_webside/notfound_page.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const String uploadMarks = '/attendance/teacher/upload_marks';
   static const String generateReport = '/attendance/teacher/generate_report';
   static const String monthlysummary = '/attendance/teacher/monthly_summary';
+  static const String fullAttendance = '/attendance/teacher/manage_attendance';
 
   static const String studentDashboard = '/attendance/student/dashboard';
   static const String studentMark = '/attendance/student/allsubMarks';
@@ -29,6 +31,7 @@ class AppRoutes {
   static const String adminPanel = '/admin/panel';
   static const String manageClasses = '/admin/classes';
   static const String manageTeachers = '/admin/teachers';
+  static const String manageAttendance = '/admin/manage_attendance';
 
   static const String dashboard = '/portfolio/dashboard';
   static const String projects = '/portfolio/projects';
@@ -47,7 +50,6 @@ class AppRoutes {
       allowedRoles: const ['teacher', 'admin'],
       child: const TeacherDashboard(role: 'teacher'),
     ),
-
 
     uploadStudents: (context) => RoleGuard(
       allowedRoles: const ['teacher', 'admin'],
@@ -72,6 +74,10 @@ class AppRoutes {
       allowedRoles: const ['teacher', 'admin'],
       child: const MonthlySummaryPage(),
     ),
+    fullAttendance: (context) => RoleGuard(
+      allowedRoles: const ['teacher'],
+      child: const ManageAttendancePage(),
+    ),
 
     // ---------- STUDENT ----------
     studentDashboard: (context) => RoleGuard(
@@ -93,14 +99,17 @@ class AppRoutes {
 
     manageClasses: (context) => RoleGuard(
       allowedRoles: const ['admin'],
-      child: const ManageClassesPage(),
+      child: const ManageStudentsPage(),
     ),
 
     manageTeachers: (context) => RoleGuard(
       allowedRoles: const ['admin'],
-      child: const ManageTeachersPage(),
+      child: const ManageUsersPage(),
     ),
-
+    manageAttendance: (context) => RoleGuard(
+      allowedRoles: const ['admin'],
+      child: const ManageAttendancePage(),
+    ),
     // ---------- PORTFOLIO (PUBLIC OR AUTH — YOUR CHOICE) ----------
     dashboard: (context) => const DashboardPage(),
     projects: (context) => const ProjectsPage(),

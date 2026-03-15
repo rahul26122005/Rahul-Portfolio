@@ -96,7 +96,7 @@ class GlassDashboardCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               border: Border.all(color: Colors.white30),
             ),
             child: Row(
