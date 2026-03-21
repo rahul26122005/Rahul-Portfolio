@@ -203,6 +203,12 @@ class _TeacherDashboardState extends State<TeacherDashboard>
           color: Colors.teal,
           onTap: () => Navigator.pushNamed(context, AppRoutes.monthlysummary),
         ),
+        _dashboardCard(
+          icon: Icons.manage_accounts_outlined,
+          title: "Manage Attendance",
+          color: Colors.amberAccent,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.fullAttendance),
+        ),
       ],
     );
   }

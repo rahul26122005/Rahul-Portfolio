@@ -137,6 +137,17 @@ class _DrawerPageState extends State<DrawerPage> {
                   title: 'Manage Teachers',
                   onTap: () => _navigate(AppRoutes.manageTeachers),
                 ),
+                _menuTile(
+                  icon: Icons.manage_accounts_sharp,
+                  title: 'Manage Attendance',
+                  onTap: () => _navigate(AppRoutes.manageAttendance),
+                ),
+
+                _menuTile(
+                  icon: Icons.settings,
+                  title: 'Settings',
+                  onTap: () => _navigate(AppRoutes.adminsettings),
+                ),
                 const Divider(),
               ],
 
@@ -167,6 +178,17 @@ class _DrawerPageState extends State<DrawerPage> {
                   title: 'Generate Report',
                   onTap: () => _navigate(AppRoutes.generateReport),
                 ),
+                _menuTile(
+                  icon: Icons.manage_accounts_sharp,
+                  title: 'Manage Attendance',
+                  onTap: () => _navigate(AppRoutes.fullAttendance),
+                ),
+
+                _menuTile(
+                  icon: Icons.settings,
+                  title: 'Settings',
+                  onTap: () => _navigate(AppRoutes.teacherssettings),
+                ),
                 const Divider(),
               ],
 
@@ -186,6 +208,12 @@ class _DrawerPageState extends State<DrawerPage> {
                   icon: Icons.assignment,
                   title: 'Marks Report',
                   onTap: () => _navigate(AppRoutes.studentMark),
+                ),
+
+                _menuTile(
+                  icon: Icons.settings,
+                  title: 'Settings',
+                  onTap: () => _navigate(AppRoutes.studentssettings),
                 ),
                 const Divider(),
               ],

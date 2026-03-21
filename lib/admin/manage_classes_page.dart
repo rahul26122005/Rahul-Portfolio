@@ -40,6 +40,13 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
     return value.trim().toUpperCase();
   }
 
+  bool isDarkMode = true;
+
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
+  }
+
   /// LOAD FILTERS
   Future<void> loadFilters() async {
     try {
@@ -325,22 +332,45 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AMS Admin Panel"),
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "AMS-Admin Panel",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
         backgroundColor: const Color(0xFF1E3C72),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => studentPopup(),
-        child: const Icon(Icons.add),
-      ),
-
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
-        onThemeChange: (val) {
-          setState(() => _isDarkMode = val);
-        },
+        onThemeChange: _toggleTheme,
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

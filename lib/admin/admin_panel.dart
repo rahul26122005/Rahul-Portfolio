@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
+import 'package:my_flutter_webside/settings/settings_page.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import 'manage_classes_page.dart';
 import 'manage_teachers_page.dart';
@@ -14,6 +15,12 @@ class AdminPanel extends StatefulWidget {
 
 class _AdminPanelState extends State<AdminPanel> {
   bool _isDarkMode = true;
+
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,9 +62,7 @@ class _AdminPanelState extends State<AdminPanel> {
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
-        onThemeChange: (val) {
-          setState(() => _isDarkMode = val);
-        },
+        onThemeChange: _toggleTheme,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -84,6 +89,15 @@ class _AdminPanelState extends State<AdminPanel> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ManageAttendancePage()),
+            ),
+          ),
+
+          _adminTile(
+            icon: Icons.people,
+            title: "Settings",
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
             ),
           ),
         ],

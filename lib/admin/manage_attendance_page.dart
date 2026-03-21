@@ -14,7 +14,7 @@ class ManageAttendancePage extends StatefulWidget {
 
 class _ManageAttendancePageState extends State<ManageAttendancePage> {
   final FirebaseFirestore db = FirebaseFirestore.instance;
-
+  bool _isDarkMode = true;
   String? selectedClass;
   String? selectedSection;
   DateTime? selectedDate;
@@ -53,6 +53,11 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
         ],
       ),
     );
+  }
+
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
   }
 
   /// LOAD CLASSES
@@ -376,14 +381,46 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   /// UI
   @override
   Widget build(BuildContext context) {
-    bool isDarkMode = true;
-
     return Scaffold(
-      appBar: AppBar(title: const Text("AMS Manage Attendance")),
-
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "AMS-Admin Panel",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        backgroundColor: const Color(0xFF1E3C72),
+      ),
       endDrawer: DrawerPage(
-        isDarkMode: isDarkMode,
-        onThemeChange: (v) => setState(() => isDarkMode = v),
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
       ),
 
       body: Padding(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
 
 class ManageUsersPage extends StatefulWidget {
   const ManageUsersPage({super.key});
@@ -16,12 +17,18 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
   final List<String> roles = ["admin", "teacher", "student"];
 
   List<DocumentSnapshot> users = [];
+  bool _isDarkMode = true;
 
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
   }
 
   /// FETCH USERS BY ROLE
@@ -236,13 +243,46 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("User Management"), centerTitle: true),
-
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => userPopup(),
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
+        title: LayoutBuilder(
+          builder: (context, constraints) {
+            return Text(
+              "AMS-Admin Panel",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: constraints.maxWidth < 600 ? 18 : 24,
+                color: Colors.white,
+                fontFeatures: const [FontFeature.enable('swap')],
+                fontStyle: FontStyle.italic,
+                shadows: const [
+                  Shadow(
+                    offset: Offset(2, 2),
+                    blurRadius: 10,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        backgroundColor: const Color(0xFF1E3C72),
       ),
-
+      endDrawer: DrawerPage(
+        isDarkMode: _isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
 

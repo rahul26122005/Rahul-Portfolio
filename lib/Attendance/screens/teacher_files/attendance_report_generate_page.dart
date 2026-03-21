@@ -34,6 +34,7 @@ class _AttendanceReportGeneratePageState
   List<String> sections = [];
 
   final Map<DateTime, String> manualHolidays = {};
+  final workingDays = <int>[];
 
   @override
   void initState() {
@@ -41,7 +42,11 @@ class _AttendanceReportGeneratePageState
     _loadClasses();
   }
 
-  // ================= LOAD CLASSES =================
+  void _toggleTheme(bool value) {
+    if (!mounted) return;
+    setState(() => _isDarkMode = value);
+  }
+
   Future<void> _loadClasses() async {
     final snap = await _db.collection('students').get();
     final set = <String>{};
@@ -53,7 +58,6 @@ class _AttendanceReportGeneratePageState
     setState(() => classes = set.toList()..sort());
   }
 
-  // ================= LOAD SECTIONS =================
   Future<void> _loadSections(String className) async {
     final snap = await _db
         .collection('students')
@@ -72,7 +76,6 @@ class _AttendanceReportGeneratePageState
     });
   }
 
-  // ================= GENERATE REPORT =================
   Future<void> generateReport() async {
     if (selectedClass == null || selectedSection == null) {
       _showMessage("Select class & section");
@@ -88,7 +91,8 @@ class _AttendanceReportGeneratePageState
 
       final daysInMonth = DateTime(selectedYear, selectedMonth + 1, 0).day;
 
-      // ---------- FETCH STUDENTS ----------
+      workingDays.clear();
+
       final studentsSnap = await _db
           .collection('students')
           .where('class', isEqualTo: selectedClass)
@@ -110,7 +114,6 @@ class _AttendanceReportGeneratePageState
         attendanceMap[regNo] = {};
       }
 
-      // ---------- FETCH ATTENDANCE ----------
       final attSnap = await _db
           .collection('attendance')
           .doc(classSection)
@@ -135,7 +138,6 @@ class _AttendanceReportGeneratePageState
         }
       }
 
-      // ---------- CREATE EXCEL ----------
       final excel = Excel.createExcel();
       final sheet = excel['Attendance'];
 
@@ -147,15 +149,28 @@ class _AttendanceReportGeneratePageState
           "${DateFormat.MMMM().format(DateTime(selectedYear, selectedMonth))} $selectedYear",
         ),
       ]);
+
+      sheet.appendRow([
+        TextCellValue("Total Working Days"),
+        TextCellValue("Auto Calculated Below"),
+      ]);
+
       sheet.appendRow([]);
 
-      // Header
       final header = <CellValue>[
         TextCellValue("Register No"),
         TextCellValue("Name"),
       ];
 
       for (int d = 1; d <= daysInMonth; d++) {
+        final date = DateTime(selectedYear, selectedMonth, d);
+
+        if (date.weekday == DateTime.saturday ||
+            date.weekday == DateTime.sunday) {
+          continue;
+        }
+
+        workingDays.add(d);
         header.add(TextCellValue(d.toString()));
       }
 
@@ -164,12 +179,13 @@ class _AttendanceReportGeneratePageState
         TextCellValue("A"),
         TextCellValue("OD"),
         TextCellValue("HD"),
+        TextCellValue("Total Days"),
+        TextCellValue("Absent Days"),
         TextCellValue("%"),
       ]);
 
       sheet.appendRow(header);
 
-      // ---------- FILL ROWS ----------
       attendanceMap.forEach((regNo, daily) {
         double total = 0;
         int validDays = 0;
@@ -180,19 +196,14 @@ class _AttendanceReportGeneratePageState
           TextCellValue(studentNames[regNo]!),
         ];
 
-        for (int d = 1; d <= daysInMonth; d++) {
-          final date = DateTime(selectedYear, selectedMonth, d);
+        for (int d in workingDays) {
+          final value = daily.containsKey(d) ? daily[d]! : "NT";
 
-          if (date.weekday == DateTime.sunday ||
-              manualHolidays.containsKey(date)) {
-            row.add(TextCellValue("H"));
-            continue;
-          }
-
-          final value = daily[d] ?? "A";
           row.add(TextCellValue(value));
 
-          validDays++;
+          if (value != "NT") {
+            validDays++;
+          }
 
           if (value == "P") {
             p++;
@@ -203,7 +214,7 @@ class _AttendanceReportGeneratePageState
           } else if (value == "HD") {
             hd++;
             total += 0.5;
-          } else {
+          } else if (value == "A") {
             a++;
           }
         }
@@ -215,6 +226,8 @@ class _AttendanceReportGeneratePageState
           IntCellValue(a),
           IntCellValue(od),
           IntCellValue(hd),
+          IntCellValue(validDays), // 🔥 TOTAL DAYS
+          IntCellValue(a), // 🔥 ABSENT DAYS
           DoubleCellValue(double.parse(percent.toStringAsFixed(2))),
         ]);
 
@@ -224,7 +237,6 @@ class _AttendanceReportGeneratePageState
       final bytes = Uint8List.fromList(excel.encode()!);
       final fileName = "Attendance_${classSection}_$monthKey.xlsx";
 
-      // ---------- DOWNLOAD ----------
       if (kIsWeb) {
         final blob = html.Blob([bytes]);
         final url = html.Url.createObjectUrlFromBlob(blob);
@@ -247,7 +259,6 @@ class _AttendanceReportGeneratePageState
     }
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -264,9 +275,7 @@ class _AttendanceReportGeneratePageState
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
-        onThemeChange: (val) {
-          setState(() => _isDarkMode = val);
-        },
+        onThemeChange: _toggleTheme,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -276,21 +285,17 @@ class _AttendanceReportGeneratePageState
               "Report Generation",
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 30),
-
             _dropdown("Class", selectedClass, classes, (v) {
               setState(() => selectedClass = v);
               _loadSections(v!);
             }),
-
             _dropdown(
               "Section",
               selectedSection,
               sections,
               (v) => setState(() => selectedSection = v),
             ),
-
             _dropdown(
               "Month",
               selectedMonth,
@@ -298,16 +303,13 @@ class _AttendanceReportGeneratePageState
               (v) => setState(() => selectedMonth = v!),
               display: (v) => DateFormat.MMMM().format(DateTime(0, v)),
             ),
-
             _dropdown(
               "Year",
               selectedYear,
               List.generate(5, (i) => DateTime.now().year - i),
               (v) => setState(() => selectedYear = v!),
             ),
-
             const SizedBox(height: 30),
-
             loading
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton.icon(

@@ -1,3 +1,4 @@
+//app routes.dart (page)
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/screens/screens.dart';
 import 'package:my_flutter_webside/admin/admin_panel.dart';
@@ -7,6 +8,7 @@ import 'package:my_flutter_webside/admin/manage_teachers_page.dart';
 import 'package:my_flutter_webside/notfound_page.dart';
 import 'package:my_flutter_webside/Attendance/screens/screens.dart';
 import 'package:my_flutter_webside/role_guard.dart';
+import 'package:my_flutter_webside/settings/settings_page.dart';
 
 class AppRoutes {
   // ================= ROUTE NAMES =================
@@ -23,18 +25,22 @@ class AppRoutes {
   static const String generateReport = '/attendance/teacher/generate_report';
   static const String monthlysummary = '/attendance/teacher/monthly_summary';
   static const String fullAttendance = '/attendance/teacher/manage_attendance';
+  static const String teacherssettings = '/attendance/teacher/settings';
 
   static const String studentDashboard = '/attendance/student/dashboard';
   static const String studentMark = '/attendance/student/allsubMarks';
   static const String studentReport = '/attendance/student/report';
+  static const String studentssettings = '/attendance/student/settings';
 
   static const String adminPanel = '/admin/panel';
   static const String manageClasses = '/admin/classes';
   static const String manageTeachers = '/admin/teachers';
   static const String manageAttendance = '/admin/manage_attendance';
+  static const String adminsettings = '/admin/settings';
 
   static const String dashboard = '/portfolio/dashboard';
   static const String projects = '/portfolio/projects';
+  static const String settings = '/portfolio/settings';
 
   static const String notFound = '/not_found';
 
@@ -79,6 +85,11 @@ class AppRoutes {
       child: const ManageAttendancePage(),
     ),
 
+    teacherssettings: (context) => RoleGuard(
+      allowedRoles: const ['teacher', 'admin'],
+      child: const SettingsPage(),
+    ),
+
     // ---------- STUDENT ----------
     studentDashboard: (context) => RoleGuard(
       allowedRoles: const ['student', 'admin'],
@@ -91,6 +102,11 @@ class AppRoutes {
     studentReport: (context) => RoleGuard(
       allowedRoles: const ['student', 'admin'],
       child: const StudentReportPage(),
+    ),
+
+    studentssettings: (context) => RoleGuard(
+      allowedRoles: const ['student', 'admin'],
+      child: const SettingsPage(),
     ),
 
     // ---------- ADMIN ONLY ----------
@@ -110,6 +126,10 @@ class AppRoutes {
       allowedRoles: const ['admin'],
       child: const ManageAttendancePage(),
     ),
+
+    adminsettings: (context) =>
+        RoleGuard(allowedRoles: const ['admin'], child: const SettingsPage()),
+
     // ---------- PORTFOLIO (PUBLIC OR AUTH — YOUR CHOICE) ----------
     dashboard: (context) => const DashboardPage(),
     projects: (context) => const ProjectsPage(),
