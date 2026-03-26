@@ -130,6 +130,11 @@ class _DrawerPageState extends State<DrawerPage>
                 title: 'Attendance',
                 onTap: () => _navigate(AppRoutes.attendanceLogin),
               ),
+              _menuTile(
+                icon: Icons.assignment,
+                title: 'Resume',
+                onTap: () => _navigate(AppRoutes.viewresume),
+              ),              
 
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),

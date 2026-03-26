@@ -1,5 +1,8 @@
 //app routes.dart (page)
 import 'package:flutter/material.dart';
+//import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_editor_page.dart';
+//import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_list_page.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_view_page.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/screens/screens.dart';
 import 'package:my_flutter_webside/admin/admin_panel.dart';
 import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
@@ -41,6 +44,9 @@ class AppRoutes {
   static const String dashboard = '/portfolio/dashboard';
   static const String projects = '/portfolio/projects';
   static const String settings = '/portfolio/settings';
+  static const String viewresume = '/portfolio/viewresume';
+  static const String listresume = '/portfolio/listresume';
+  static const String editresume = '/portfolio/editresume';
 
   static const String notFound = '/not_found';
 
@@ -133,6 +139,9 @@ class AppRoutes {
     // ---------- PORTFOLIO (PUBLIC OR AUTH — YOUR CHOICE) ----------
     dashboard: (context) => const DashboardPage(),
     projects: (context) => const ProjectsPage(),
+    viewresume: (context) => const ResumeViewPage(),
+    //listresume: (context) => const ResumeListPage(),
+    //editresume: (context) => const ResumeEditorPage(),
 
     // ---------- GUEST ----------
     guestDashboard: (context) => const GuestDashboard(),
