@@ -19,6 +19,7 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
@@ -30,7 +31,7 @@ class DashboardCard extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.green],
+              colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -85,6 +86,7 @@ class GlassDashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
@@ -96,8 +98,10 @@ class GlassDashboardCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: Colors.white.withValues(alpha: 0.15),
-              border: Border.all(color: Colors.white30),
+              color: theme.colorScheme.surfaceContainerHighest.withAlpha(018),
+              border: Border.all(
+                color: theme.colorScheme.onSurface.withAlpha(022),
+              ),
             ),
             child: Row(
               children: [

@@ -25,6 +25,12 @@ jobs:
       - name: Build Flutter Web
         run: flutter build web
 
+      - name: Build Flutter Android APK
+        run: flutter build apk --release
+
+      - name: Copy APK to Web Folder
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/web/app-release.apk
+
       - name: Deploy to Firebase Hosting (Live)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:

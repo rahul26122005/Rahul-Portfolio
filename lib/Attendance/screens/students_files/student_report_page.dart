@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class StudentReportPage extends StatefulWidget {
@@ -47,7 +48,7 @@ class _StudentReportPageState extends State<StudentReportPage>
   Widget build(BuildContext context) {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -93,7 +94,7 @@ class _StudentReportPageState extends State<StudentReportPage>
             icon: Icon(Icons.home, color: Colors.white),
           ),
         ],
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,

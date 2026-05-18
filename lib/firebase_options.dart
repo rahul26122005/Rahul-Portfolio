@@ -21,15 +21,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -62,7 +56,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDZgrWTh4WBYhvril-TnITqgjxPPFO3_vM',
-    appId: '1:270147714540:windows:b1881b7bd185d565ad14c9',
+    appId: '1:270147714540:web:b1881b7bd185d565ad14c9',
     messagingSenderId: '270147714540',
     projectId: 'flutter-web-application-1a0a9',
     authDomain: 'flutter-web-application-1a0a9.firebaseapp.com',
@@ -70,4 +64,26 @@ class DefaultFirebaseOptions {
     storageBucket: 'flutter-web-application-1a0a9.firebasestorage.app',
     measurementId: 'G-Y4E5FZ90C5',
   );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDPJbybKeeDX29__tGTYI2A6yXYgleb0cQ',
+    appId: '1:270147714540:ios:24cfc9da2b364612ad14c9',
+    messagingSenderId: '270147714540',
+    projectId: 'flutter-web-application-1a0a9',
+    databaseURL: 'https://flutter-web-application-1a0a9-default-rtdb.firebaseio.com',
+    storageBucket: 'flutter-web-application-1a0a9.firebasestorage.app',
+    androidClientId: '270147714540-camsfvlcaq6fvf9r48sfmm43cpvofkj2.apps.googleusercontent.com',
+    iosClientId: '270147714540-2l6jogmmlo12d1jso37qc4hm8ic4be4q.apps.googleusercontent.com',
+    iosBundleId: 'com.example.myFlutterWebside',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCwtEWppAk-GkvTakHnfhDKzOpErJnYY5Y',
+    appId: '1:270147714540:android:b22842f2c0213992ad14c9',
+    messagingSenderId: '270147714540',
+    projectId: 'flutter-web-application-1a0a9',
+    databaseURL: 'https://flutter-web-application-1a0a9-default-rtdb.firebaseio.com',
+    storageBucket: 'flutter-web-application-1a0a9.firebasestorage.app',
+  );
+
 }

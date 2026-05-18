@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+import 'package:provider/provider.dart';
 import 'settings_controller.dart';
 import 'settings_tile.dart';
+import 'package:my_flutter_webside/main.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -36,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _toggleTheme(bool value) async {
-    setState(() => isDarkMode = value);
+    context.read<ThemeNotifier>().toggleTheme();
     await controller.updateTheme(value);
   }
 
@@ -48,8 +52,31 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Settings")),
+    return ZoomableScaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+        ),
+        actions: [
+          Builder(
+            builder: (context) => IconButton(
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              icon: Icon(Icons.menu, color: Colors.white),
+              iconSize: 22,
+            ),
+          ),
+        ],
+        title: const Text("Settings"),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
+      endDrawer: DrawerPage(
+        isDarkMode: isDarkMode,
+        onThemeChange: _toggleTheme,
+      ),
       body: ListView(
         children: [
           // ================= PROFILE =================
@@ -65,22 +92,23 @@ class _SettingsPageState extends State<SettingsPage> {
           SettingsTile(
             title: "Dark Mode",
             icon: Icons.dark_mode,
-            trailing: Switch(value: isDarkMode, onChanged: _toggleTheme),
+            trailing: Consumer<ThemeNotifier>(
+              builder: (context, themeNotifier, _) {
+                return Switch(
+                  value: themeNotifier.themeMode == ThemeMode.dark,
+                  onChanged: _toggleTheme,
+                );
+              },
+            ),
           ),
 
-          SettingsTile(
-            title: "Edit Profile",
-            icon: Icons.edit,
-            onTap: () {
-              // Navigate later
-            },
-          ),
+          SettingsTile(title: "Edit Profile", icon: Icons.edit, onTap: () {}),
 
           SettingsTile(
             title: "Change Password",
             icon: Icons.lock,
             onTap: () {
-              // Add reset logic
+              Navigator.pushNamed(context, "/attendance/forgot_password");
             },
           ),
 
@@ -89,9 +117,9 @@ class _SettingsPageState extends State<SettingsPage> {
           // ================= ROLE BASED =================
           if (role == "admin") ..._adminSettings(),
 
-          if (role == "teacher") ..._teacherSettings(),
+          if (role == "teacher" || role == "admin") ..._teacherSettings(),
 
-          if (role == "student") ..._studentSettings(),
+          if (role == "student" || role == "admin") ..._studentSettings(),
 
           const Divider(),
 

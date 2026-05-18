@@ -31,7 +31,7 @@ class AppRoutes {
   static const String teacherssettings = '/attendance/teacher/settings';
 
   static const String studentDashboard = '/attendance/student/dashboard';
-  static const String studentMark = '/attendance/student/allsubMarks';
+  static const String studentMark = '/attendance/student/all-subMarks';
   static const String studentReport = '/attendance/student/report';
   static const String studentssettings = '/attendance/student/settings';
 

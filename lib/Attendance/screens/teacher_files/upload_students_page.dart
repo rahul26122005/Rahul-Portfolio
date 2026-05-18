@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class UploadStudentsPage extends StatefulWidget {
@@ -32,7 +33,7 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -78,7 +79,7 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
             );
           },
         ),
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,

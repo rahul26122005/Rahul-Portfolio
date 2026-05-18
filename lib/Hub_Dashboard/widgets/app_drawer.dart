@@ -134,7 +134,7 @@ class _DrawerPageState extends State<DrawerPage>
                 icon: Icons.assignment,
                 title: 'Resume',
                 onTap: () => _navigate(AppRoutes.viewresume),
-              ),              
+              ),
 
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -164,7 +164,6 @@ class _DrawerPageState extends State<DrawerPage>
                   context.read<ThemeNotifier>().toggleTheme();
                 },
               ),
-
               _menuTile(
                 icon: Icons.settings,
                 title: 'App Settings',

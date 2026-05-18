@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class MonthlySummaryPage extends StatefulWidget {
@@ -29,8 +30,6 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
   //  Summary
   int p = 0, a = 0, od = 0, hd = 0, workingDays = 0;
   bool loading = false;
-
-  // 🔹 Firestore streams
   Stream<QuerySnapshot> get classStream =>
       _db.collection('students').snapshots();
 
@@ -42,7 +41,6 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
       firstDate: DateTime(now.year - 2),
       lastDate: DateTime(now.year + 1),
     );
-
     if (picked != null) {
       setState(() {
         selectedMonth = DateFormat('yyyy-MM').format(picked);
@@ -96,7 +94,7 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
     final total = p + a + od + hd;
     final percent = total == 0 ? 0 : ((p + od + (hd * 0.5)) / total) * 100;
 
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
@@ -142,7 +140,7 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
             );
           },
         ),
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,

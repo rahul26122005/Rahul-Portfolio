@@ -4,7 +4,9 @@ import 'package:my_flutter_webside/settings/settings_page.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
 import 'manage_classes_page.dart';
 import 'manage_teachers_page.dart';
+import 'attendance_report_generate_page.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -23,7 +25,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: [
@@ -99,6 +101,16 @@ class _AdminPanelState extends State<AdminPanel> {
               context,
               MaterialPageRoute(builder: (_) => const SettingsPage()),
             ),
+          ),
+          _adminTile(
+            icon: Icons.summarize,
+            title: 'Six Month Report',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AttendanceReportGeneratePage(),
+              ),
+            ), // Ensure this route is defined
           ),
         ],
       ),

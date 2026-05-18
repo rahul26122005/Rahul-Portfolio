@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class GuestDashboard extends StatelessWidget {
   const GuestDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.teal, Colors.green],
-          ),
+          gradient: LinearGradient(colors: [Colors.teal, Colors.green]),
         ),
         child: SafeArea(
           child: Column(
@@ -31,7 +30,8 @@ class GuestDashboard extends StatelessWidget {
                 child: Card(
                   margin: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: ListView(
                     children: const [
                       ListTile(
@@ -48,7 +48,7 @@ class GuestDashboard extends StatelessWidget {
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

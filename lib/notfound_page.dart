@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class NotFoundPage extends StatefulWidget {
   const NotFoundPage({super.key});
@@ -22,7 +23,7 @@ class _NotFoundPageState extends State<NotFoundPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
       appBar: AppBar(
         title: const Text('Page Not Found'),
@@ -63,10 +64,31 @@ class _NotFoundPageState extends State<NotFoundPage> {
               style: TextStyle(fontSize: 18),
             ),
           ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.studentDashboard);
+            },
+            icon: Icon(Icons.school),
+            label: const Text('Go to Student Dashboard'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.teacherDashboard);
+            },
+            icon: Icon(Icons.dashboard_customize),
+            label: const Text('Go to Teacher Dashboard'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.dashboard);
+            },
+            icon: Icon(Icons.workspaces),
+            label: const Text('Go to Portfolio Dashboard'),
+          ),
 
           Center(
             child: Text(
-              'Failed to load profile.\nPlease contact admin.\n\n G-mail: biomed.rahulr1201@gmail.com',
+              '\n\n Failed to load profile.\nPlease contact admin.\n\n G-mail: biomed.rahulr1201@gmail.com',
               textAlign: TextAlign.center,
             ),
           ),

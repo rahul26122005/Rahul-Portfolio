@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'Attendance/auth_screens/login_screen.dart';
 
@@ -59,7 +60,7 @@ class _RoleGuardState extends State<RoleGuard> {
         }
 
         // Unauthorized
-        return Scaffold(
+        return ZoomableScaffold(
           drawer: DrawerPage(
             isDarkMode: isDarkMode,
             onThemeChange: toggleTheme,

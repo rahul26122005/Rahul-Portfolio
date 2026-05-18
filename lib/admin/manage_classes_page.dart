@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class ManageStudentsPage extends StatefulWidget {
   const ManageStudentsPage({super.key});
@@ -195,10 +196,20 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
 
                   /// CLASS DROPDOWN
                   DropdownButtonFormField<String>(
-                    hint: const Text("Select Class"),
-                    initialValue: classValue,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      labelText: "Select Class",
+                      border: OutlineInputBorder(),
+                    ),
+                    value: classValue,
                     items: classes
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .map((c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(c, overflow: TextOverflow.ellipsis),
+                            ))
                         .toList(),
                     onChanged: (v) {
                       setStatePopup(() {
@@ -212,10 +223,20 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
 
                   /// SECTION DROPDOWN
                   DropdownButtonFormField<String>(
-                    hint: const Text("Select Section"),
-                    initialValue: sectionValue,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      labelText: "Select Section",
+                      border: OutlineInputBorder(),
+                    ),
+                    value: sectionValue,
                     items: (classSections[classValue] ?? [])
-                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .map((s) => DropdownMenuItem(
+                              value: s,
+                              child: Text(s, overflow: TextOverflow.ellipsis),
+                            ))
                         .toList(),
                     onChanged: (v) {
                       setStatePopup(() {
@@ -262,7 +283,7 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                               .doc(student.id)
                               .update(data);
                         }
-
+                        if (!context.mounted) return;
                         Navigator.pop(context);
 
                         loadFilters();
@@ -330,9 +351,9 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         actions: [
           Builder(
             builder: (context) => IconButton(
@@ -347,7 +368,7 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
-              "AMS-Admin Panel",
+              "Manage Students",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: constraints.maxWidth < 600 ? 18 : 24,
@@ -365,7 +386,7 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
             );
           },
         ),
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
@@ -376,9 +397,15 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
         child: Column(
           children: [
             /// SEARCH
-            Row(
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Expanded(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width < 600
+                      ? double.infinity
+                      : 300,
                   child: TextField(
                     controller: searchCtrl,
                     decoration: const InputDecoration(
@@ -387,7 +414,6 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: searchStudent,
                   child: const Text("Search"),
@@ -398,14 +424,29 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
             const SizedBox(height: 20),
 
             /// FILTERS
-            Row(
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
-                Expanded(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width < 600
+                      ? (MediaQuery.of(context).size.width - 50) / 2
+                      : 200,
                   child: DropdownButtonFormField<String>(
-                    hint: const Text("Class"),
-                    initialValue: selectedClass,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      labelText: "Class",
+                      border: OutlineInputBorder(),
+                    ),
+                    value: selectedClass,
                     items: classes
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .map((c) => DropdownMenuItem(
+                              value: c,
+                              child: Text(c, overflow: TextOverflow.ellipsis),
+                            ))
                         .toList(),
                     onChanged: (v) {
                       setState(() {
@@ -416,15 +457,25 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     },
                   ),
                 ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width < 600
+                      ? (MediaQuery.of(context).size.width - 50) / 2
+                      : 200,
                   child: DropdownButtonFormField<String>(
-                    hint: const Text("Section"),
-                    initialValue: selectedSection,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      labelText: "Section",
+                      border: OutlineInputBorder(),
+                    ),
+                    value: selectedSection,
                     items: (classSections[selectedClass] ?? [])
-                        .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                        .map((s) => DropdownMenuItem(
+                              value: s,
+                              child: Text(s, overflow: TextOverflow.ellipsis),
+                            ))
                         .toList(),
                     onChanged: (v) {
                       setState(() => selectedSection = v);
@@ -440,17 +491,80 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
             /// TABLE
             Expanded(
               child: SingleChildScrollView(
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text("Name")),
-                    DataColumn(label: Text("Register No")),
-                    DataColumn(label: Text("Class")),
-                    DataColumn(label: Text("Section")),
-                    DataColumn(label: Text("Mobile")),
-                    DataColumn(label: Text("DOB")),
-                    DataColumn(label: Text("Actions")),
-                  ],
-                  rows: students.map((doc) => buildRow(doc)).toList(),
+                scrollDirection: Axis.vertical,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    headingRowColor: WidgetStateProperty.all(
+                      Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ),
+                    columns: [
+                      DataColumn(
+                        label: Text(
+                          "Name",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "Register No",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "Class",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "Section",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "Mobile",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "DOB",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          "Actions",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                    rows: students.map((doc) => buildRow(doc)).toList(),
+                  ),
                 ),
               ),
             ),
@@ -465,6 +579,11 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFC5A059),
+        onPressed: () => studentPopup(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

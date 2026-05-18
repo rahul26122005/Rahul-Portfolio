@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class ManageUsersPage extends StatefulWidget {
   const ManageUsersPage({super.key});
@@ -159,7 +160,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
                       } else {
                         await db.collection('users').doc(user.id).update(data);
                       }
-
+                      if (!mounted) return;
                       Navigator.pop(context);
 
                       fetchUsers();
@@ -242,9 +243,9 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         actions: [
           Builder(
             builder: (context) => IconButton(
@@ -259,7 +260,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
         title: LayoutBuilder(
           builder: (context, constraints) {
             return Text(
-              "AMS-Admin Panel",
+              "Manage Teachers & Users",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: constraints.maxWidth < 600 ? 18 : 24,
@@ -277,7 +278,7 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             );
           },
         ),
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
@@ -289,22 +290,35 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
         child: Column(
           children: [
             /// ROLE FILTER
-            DropdownButtonFormField<String>(
-              hint: const Text("Select Role"),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    hint: const Text("Select Role"),
+                    initialValue: selectedRole,
+                    items: roles.map((r) {
+                      return DropdownMenuItem(
+                        value: r,
+                        child: Text(r.toUpperCase()),
+                      );
+                    }).toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        selectedRole = v;
+                      });
 
-              initialValue: selectedRole,
-
-              items: roles.map((r) {
-                return DropdownMenuItem(value: r, child: Text(r.toUpperCase()));
-              }).toList(),
-
-              onChanged: (v) {
-                setState(() {
-                  selectedRole = v;
-                });
-
-                fetchUsers();
-              },
+                      fetchUsers();
+                    },
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 20),
@@ -317,23 +331,89 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             else
               Expanded(
                 child: SingleChildScrollView(
-                  child: DataTable(
-                    headingRowColor: WidgetStateProperty.all(
-                      Colors.grey.shade200,
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      headingRowColor: WidgetStateProperty.all(
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                      ),
+                      columns: [
+                        DataColumn(
+                          label: Text(
+                            "Name",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Email",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Role",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Class",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Section",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Register No",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Active",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            "Actions",
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                      rows: users.map((doc) => buildRow(doc)).toList(),
                     ),
-
-                    columns: const [
-                      DataColumn(label: Text("Name")),
-                      DataColumn(label: Text("Email")),
-                      DataColumn(label: Text("Role")),
-                      DataColumn(label: Text("Class")),
-                      DataColumn(label: Text("Section")),
-                      DataColumn(label: Text("Register No")),
-                      DataColumn(label: Text("Active")),
-                      DataColumn(label: Text("Actions")),
-                    ],
-
-                    rows: users.map((doc) => buildRow(doc)).toList(),
                   ),
                 ),
               ),
@@ -341,6 +421,11 @@ class _ManageUsersPageState extends State<ManageUsersPage> {
             if (isLoading) const CircularProgressIndicator(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFC5A059),
+        onPressed: () => userPopup(),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

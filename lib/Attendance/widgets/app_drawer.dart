@@ -54,17 +54,22 @@ class _DrawerPageState extends State<DrawerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final user = _auth.currentUser;
 
     if (user == null) {
-      return const Drawer(child: Center(child: Text("Not logged in")));
+      return Drawer(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        child: Center(
+          child: Text("Not logged in", style: theme.textTheme.bodyMedium),
+        ),
+      );
     }
 
     return Drawer(
-      backgroundColor: const Color.fromARGB(255, 226, 220, 220),
-      shadowColor: Colors.greenAccent,
-
-      shape: Border.all(color: Colors.black, style: BorderStyle.solid),
+      backgroundColor: theme.scaffoldBackgroundColor,
+      shadowColor: theme.shadowColor,
+      shape: Border.all(color: theme.dividerColor, style: BorderStyle.solid),
       child: StreamBuilder<DocumentSnapshot>(
         stream: _firestore.collection('users').doc(user.uid).snapshots(),
         builder: (context, snapshot) {
@@ -142,7 +147,11 @@ class _DrawerPageState extends State<DrawerPage> {
                   title: 'Manage Attendance',
                   onTap: () => _navigate(AppRoutes.manageAttendance),
                 ),
-
+                _menuTile(
+                  icon: Icons.analytics_outlined,
+                  title: 'Six Months Report',
+                  onTap: () => _navigate(AppRoutes.generateReport),
+                ),
                 _menuTile(
                   icon: Icons.settings,
                   title: 'Settings',
@@ -242,15 +251,18 @@ class _DrawerPageState extends State<DrawerPage> {
                   context.read<ThemeNotifier>().toggleTheme();
                 },
               ),
-
               _menuTile(icon: Icons.logout, title: 'Logout', onTap: _logout),
 
               const SizedBox(height: 12),
 
-              const Center(
+              Center(
                 child: Text(
                   '© 2025 Rahul Portfolio',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.textTheme.bodySmall?.color?.withValues(
+                      alpha: 0.75,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),

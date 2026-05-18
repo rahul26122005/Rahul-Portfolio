@@ -4,9 +4,12 @@ import 'package:my_flutter_webside/Hub_Dashboard/widgets/emptystate.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/errorstate.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/project_card.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:my_flutter_webside/main.dart';
+import 'package:my_flutter_webside/services/update_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -25,6 +28,15 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() => _isDarkMode = value);
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Check for updates when the dashboard is loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      UpdateService.checkUpdate(context);
+    });
+  }
+
   // ================= RESPONSIVE GRID =================
   int _getCrossAxisCount(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -37,7 +49,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
 
       appBar: AppBar(
@@ -139,14 +151,24 @@ class _DashboardPageState extends State<DashboardPage> {
                         icon: Icons.dashboard,
                         projectUrl: project['url'],
                         color: Colors.blueAccent,
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Opening ${project['title'] ?? 'Project'}',
+                        onTap: () async {
+                          final url = project['url'];
+                          if (url != null && url.isNotEmpty) {
+                            await launchUrl(
+                              Uri.parse(url),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          }
+                          if (!context.mounted) {
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Opening ${project['title'] ?? 'Project'}',
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                       );
                     },

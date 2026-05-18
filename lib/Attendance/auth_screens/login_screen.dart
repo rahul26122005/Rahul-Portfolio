@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/services/auth_service.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,13 +14,47 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  final emailFocus = FocusNode();
+  final passwordFocus = FocusNode();
 
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
+  void dispose() {
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitLogin() async {
+    if (_isLoading) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await AuthService().login(
+      context,
+      emailCtrl.text.trim(),
+      passCtrl.text.trim(),
+    );
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: LayoutBuilder(
@@ -44,14 +79,18 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF1E3C72), Color(0xFF2A5298), Color(0xFF4CAF50)],
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.primaryContainer,
+              Theme.of(context).colorScheme.secondary,
+            ],
           ),
         ),
         child: Center(
@@ -91,7 +130,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Email
                         TextFormField(
                           controller: emailCtrl,
+                          focusNode: emailFocus,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) {
+                            FocusScope.of(context).requestFocus(passwordFocus);
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Email is required";
@@ -117,7 +161,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         // Password
                         TextFormField(
                           controller: passCtrl,
+                          focusNode: passwordFocus,
                           obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _submitLogin(),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Password is required";
@@ -172,27 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 48,
                           child: FilledButton(
-                            onPressed: _isLoading
-                                ? null
-                                : () async {
-                                    if (!_formKey.currentState!.validate()) {
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      _isLoading = true;
-                                    });
-
-                                    await AuthService().login(
-                                      context,
-                                      emailCtrl.text.trim(),
-                                      passCtrl.text.trim(),
-                                    );
-
-                                    setState(() {
-                                      _isLoading = false;
-                                    });
-                                  },
+                            onPressed: _isLoading ? null : _submitLogin,
                             child: _isLoading
                                 ? const SizedBox(
                                     height: 22,
@@ -207,6 +234,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
 
                         const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Or Back to Home Page?",
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pushNamed(
+                                context,
+                                '/portfolio/dashboard',
+                              ),
+                              child: const Text("Home"),
+                            ),
+                          ],
+                        ),
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,

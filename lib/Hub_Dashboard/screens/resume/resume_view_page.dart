@@ -1,229 +1,666 @@
-import 'package:flutter/material.dart';
+// no top-level dart: imports required here
 
-class ResumeViewPage extends StatelessWidget {
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+import 'package:my_flutter_webside/routes/app_routes.dart';
+import 'package:my_flutter_webside/utils/file_downloader.dart';
+
+import 'resume_data.dart';
+import 'resume_pdf_generator.dart';
+import 'resume_docx_generator.dart';
+
+class ResumeViewPage extends StatefulWidget {
   const ResumeViewPage({super.key});
 
   @override
+  State<ResumeViewPage> createState() => _ResumeViewPageState();
+}
+
+class _ResumeViewPageState extends State<ResumeViewPage> {
+  bool _isSaving = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: SingleChildScrollView(
-        child: Center(
-        child: Container(
-          width: 950,
-          margin: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
-              )
-            ],
+    final theme = Theme.of(context);
+
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
+    final Color scaffoldBackgroundColor = theme.scaffoldBackgroundColor;
+
+    final Color cardColor = theme.cardColor;
+
+    final Color accentColor = theme.colorScheme.secondary;
+
+    final Color textColor =
+        theme.textTheme.bodyLarge?.color ??
+        (isDarkMode ? Colors.white : Colors.black);
+
+    final Color secondaryTextColor =
+        theme.textTheme.bodyMedium?.color?.withAlpha(204) ??
+        (isDarkMode ? Colors.white70 : Colors.black87);
+
+    const double bodyFontSize = 13.0;
+
+    const double sectionHeaderSize = 16.0;
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    final bool isMobile = screenWidth < 700;
+
+    final resume = sampleResume();
+
+    return ZoomableScaffold(
+      backgroundColor: scaffoldBackgroundColor,
+
+      endDrawer: DrawerPage(isDarkMode: isDarkMode, onThemeChange: (_) {}),
+
+      // =================================================
+      // APP BAR
+      // =================================================
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.popAndPushNamed(context, AppRoutes.dashboard);
+          },
+
+          icon: Icon(Icons.arrow_back, color: textColor),
+        ),
+
+        title: Text(
+          "My Resume",
+
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+        ),
+
+        actions: [
+          // DOWNLOAD
+          IconButton(
+            icon: Icon(Icons.download, color: textColor),
+
+            tooltip: 'Download resume',
+
+            onPressed: _isSaving ? null : _showDownloadDialog,
           ),
-          child: Row(
-            children: [
-              // ================= LEFT PANEL =================
-              Container(
-                width: 280,
-                color: const Color(0xFFEDEDED),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 25),
+        ],
+
+        backgroundColor: theme.appBarTheme.backgroundColor ?? cardColor,
+
+        elevation: 1,
+
+        centerTitle: true,
+
+        iconTheme: IconThemeData(color: textColor),
+      ),
+
+      // =================================================
+      // BODY
+      // =================================================
+      body: SafeArea(
+        child: SizedBox.expand(
+          child: SingleChildScrollView(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 850),
+
+                margin: EdgeInsets.symmetric(
+                  vertical: isMobile ? 0 : 40,
+
+                  horizontal: isMobile ? 0 : 20,
+                ),
+
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 24 : 60,
+
+                  vertical: isMobile ? 40 : 60,
+                ),
+
+                decoration: BoxDecoration(
+                  color: cardColor,
+
+                  boxShadow: isMobile
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: isDarkMode
+                                ? Colors.white.withAlpha(10)
+                                : Colors.black.withAlpha(26),
+
+                            blurRadius: 20,
+
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                ),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
-                    // PHOTO
-                    Center(
-                      child: CircleAvatar(
-                        radius: 55,
-                        backgroundImage:
-                            const AssetImage('assets/images/profile.jpg'),
+                    // ================= HEADER =================
+                    Text(
+                      resume.name,
+
+                      style: TextStyle(
+                        fontSize: 42,
+
+                        fontWeight: FontWeight.bold,
+
+                        letterSpacing: 1.5,
+
+                        color: textColor,
+
+                        height: 1.1,
                       ),
                     ),
 
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 4),
 
-                    // CONTACT
-                    const Text("CONTACT",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 1)),
-                    const Divider(thickness: 1),
+                    Text(
+                      resume.headline,
 
-                    const SizedBox(height: 8),
+                      style: TextStyle(
+                        fontSize: 20,
 
-                    const Text("📧 rahul@email.com"),
-                    const SizedBox(height: 6),
-                    const Text("📞 9876543210"),
-                    const SizedBox(height: 6),
-                    const Text("📍 Tamil Nadu"),
-                    const SizedBox(height: 6),
-                    const Text("🔗 linkedin.com/rahul"),
+                        fontWeight: FontWeight.w500,
 
-                    const SizedBox(height: 25),
+                        letterSpacing: 1.2,
 
-                    // EDUCATION
-                    const Text("EDUCATION",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 1)),
-                    const Divider(thickness: 1),
-
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      "B.E Biomedical Engineering",
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                        color: textColor,
+                      ),
                     ),
-                    const Text("Anna University"),
-                    const Text("2022 - 2026"),
 
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 2),
 
-                    // SKILLS
-                    const Text("SKILLS",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 1)),
-                    const Divider(thickness: 1),
+                    Text(
+                      resume.subHeadline,
 
-                    const SizedBox(height: 8),
+                      style: TextStyle(
+                        fontSize: 20,
 
-                    const Text("• Flutter"),
-                    const Text("• Firebase"),
-                    const Text("• Python"),
-                    const Text("• Machine Learning"),
+                        fontWeight: FontWeight.w500,
 
-                    const SizedBox(height: 25),
+                        letterSpacing: 1.2,
 
-                    // LANGUAGES
-                    const Text("LANGUAGES",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            letterSpacing: 1)),
-                    const Divider(thickness: 1),
+                        color: textColor,
+                      ),
+                    ),
 
                     const SizedBox(height: 8),
 
-                    const Text("English (Fluent)"),
-                    const Text("Tamil (Native)"),
+                    Text(
+                      resume.contactLine,
+
+                      style: TextStyle(
+                        fontSize: 13,
+
+                        color: secondaryTextColor,
+
+                        height: 1.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    Divider(thickness: 1.5, color: accentColor),
+
+                    const SizedBox(height: 25),
+
+                    // ================= SUMMARY =================
+                    _buildSectionHeader(
+                      "SUMMARY",
+
+                      accentColor,
+
+                      sectionHeaderSize,
+
+                      textColor,
+                    ),
+
+                    Text(
+                      resume.summary,
+
+                      style: TextStyle(
+                        fontSize: bodyFontSize,
+
+                        height: 1.6,
+
+                        color: textColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ================= SKILLS =================
+                    _buildSectionHeader(
+                      "TECHNICAL SKILLS",
+
+                      accentColor,
+
+                      sectionHeaderSize,
+
+                      textColor,
+                    ),
+
+                    _buildSkillGrid(resume.skills, secondaryTextColor),
+
+                    const SizedBox(height: 10),
+
+                    // ================= PROJECTS =================
+                    _buildSectionHeader(
+                      "PROJECTS/INTERNSHIPS",
+
+                      accentColor,
+
+                      sectionHeaderSize,
+
+                      textColor,
+                    ),
+
+                    ...resume.projects.map(
+                      (project) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+
+                        child: _buildExperienceItem(
+                          title: project.title,
+
+                          date: project.date,
+
+                          subTitle: project.subTitle,
+
+                          bullets: project.bullets,
+
+                          titleColor: textColor,
+
+                          bodyColor: secondaryTextColor,
+                        ),
+                      ),
+                    ),
+
+                    // ================= EDUCATION =================
+                    _buildSectionHeader(
+                      "EDUCATION",
+
+                      accentColor,
+
+                      sectionHeaderSize,
+
+                      textColor,
+                    ),
+
+                    ...resume.education.map(
+                      (education) => Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+
+                        child: _buildExperienceItem(
+                          title: education.title,
+
+                          date: education.date,
+
+                          subTitle: education.subTitle,
+
+                          bullets: education.bullets,
+
+                          titleColor: textColor,
+
+                          bodyColor: secondaryTextColor,
+                        ),
+                      ),
+                    ),
+
+                    // ================= ADDITIONAL =================
+                    _buildSectionHeader(
+                      "ADDITIONAL INFORMATION",
+
+                      accentColor,
+
+                      sectionHeaderSize,
+
+                      textColor,
+                    ),
+
+                    ...resume.additional.map(
+                      (item) => _buildAdditionalPoint(
+                        item,
+
+                        textColor,
+
+                        secondaryTextColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
                   ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-              // ================= RIGHT PANEL =================
-              Expanded(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // NAME
-                        const Text(
-                          "RAHUL R",
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
+  Future<void> _showDownloadDialog() async {
+    final selected = await showDialog<String>(
+      context: context,
 
-                        const SizedBox(height: 5),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Download resume'),
 
-                        // ROLE
-                        const Text(
-                          "Flutter Developer",
-                          style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                              letterSpacing: 1),
-                        ),
+          content: const Text('Which document format do you want?'),
 
-                        const SizedBox(height: 10),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'docx'),
 
-                        const Divider(thickness: 2),
+              child: const Text('DOCX'),
+            ),
 
-                        const SizedBox(height: 15),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'pdf'),
 
-                        // CAREER OBJECTIVE
-                        const Text("CAREER OBJECTIVE",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 1)),
+              child: const Text('PDF'),
+            ),
 
-                        const SizedBox(height: 6),
-                        const Divider(),
+            TextButton(
+              onPressed: () => Navigator.pop(context, null),
 
-                        const Text(
-                          "Motivated Flutter developer with strong analytical and problem-solving skills. Passionate about building scalable and user-friendly applications.",
-                        ),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
 
-                        const SizedBox(height: 20),
+    if (selected != null) {
+      await _downloadResume(selected);
+    }
+  }
 
-                        // PROJECTS
-                        const Text("PROJECTS",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 1)),
+  Future<void> _downloadResume(String type) async {
+    setState(() {
+      _isSaving = true;
+    });
 
-                        const SizedBox(height: 6),
-                        const Divider(),
+    try {
+      final resume = sampleResume();
 
-                        const Text(
-                            "• Attendance Management System\nBuilt using Flutter + Firebase with role-based authentication."),
+      final bytes = type == 'pdf'
+          ? await generateResumePdf(resume)
+          : generateResumeDocx(resume);
 
-                        const SizedBox(height: 8),
+      final fileName =
+          'Rahul_Rajarajan_Resume.${type == 'pdf' ? 'pdf' : 'docx'}';
 
-                        const Text(
-                            "• Customer Churn Prediction\nMachine Learning model using Random Forest (Accuracy: 86.49%)."),
+      final savedPath = await saveFileBytes(bytes, fileName);
 
-                        const SizedBox(height: 20),
+      if (!mounted) return;
 
-                        // INTERNSHIP
-                        const Text("INTERNSHIP",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 1)),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            kIsWeb
+                ? 'Starting download of $fileName'
+                : 'Resume saved to: $savedPath',
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
 
-                        const SizedBox(height: 6),
-                        const Divider(),
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Download failed: $error')));
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
+    }
+  }
 
-                        const Text(
-                            "Intern - XYZ Company\nWorked on mobile UI development and Firebase backend integration."),
+  Widget _buildSectionHeader(
+    String title,
+    Color color,
+    double fontSize,
+    Color textColor,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
 
-                        const SizedBox(height: 20),
+      children: [
+        Text(
+          title,
 
-                        // CERTIFICATIONS
-                        const Text("CERTIFICATIONS",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                letterSpacing: 1)),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
 
-                        const SizedBox(height: 6),
-                        const Divider(),
+            fontSize: fontSize,
 
-                        const Text(
-                            "• Flutter Development - Udemy\n• Machine Learning - Coursera"),
-                      ],
+            letterSpacing: 1.1,
+
+            color: textColor,
+          ),
+        ),
+
+        Container(
+          margin: const EdgeInsets.only(top: 4, bottom: 15),
+
+          height: 1.5,
+
+          color: color,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSkillGrid(List<String> skills, Color textColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: skills
+          .map(
+            (skill) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+
+                    child: Icon(
+                      Icons.circle,
+
+                      size: 6,
+
+                      color: textColor.withAlpha(150),
+                    ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  Expanded(
+                    child: Text(
+                      skill,
+
+                      style: TextStyle(fontSize: 13, color: textColor),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildExperienceItem({
+    required String title,
+    required String date,
+    String? subTitle,
+    required List<String> bullets,
+    required Color titleColor,
+    required Color bodyColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          crossAxisAlignment: CrossAxisAlignment.start,
+
+          children: [
+            Expanded(
+              child: Text(
+                title,
+
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+
+                  fontSize: 14,
+
+                  color: titleColor,
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12),
+
+            Text(
+              date,
+
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+
+                fontSize: 13,
+
+                color: titleColor,
+              ),
+            ),
+          ],
+        ),
+
+        if (subTitle != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 2, bottom: 4),
+
+            child: Text(
+              subTitle,
+
+              style: TextStyle(fontSize: 13, color: bodyColor),
+            ),
+          ),
+
+        const SizedBox(height: 4),
+
+        ...bullets.map(
+          (bullet) => Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 4),
+
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+
+                  child: Icon(Icons.circle, size: 5, color: bodyColor),
+                ),
+
+                const SizedBox(width: 10),
+
+                Expanded(
+                  child: Text(
+                    bullet,
+
+                    style: TextStyle(
+                      fontSize: 13,
+
+                      height: 1.5,
+
+                      color: bodyColor,
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),),
+      ],
     );
+  }
+
+  Widget _buildRichBulletPoint(
+    String label,
+    String value,
+    Color textColor,
+    Color bulletColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 8),
+
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+
+            child: Icon(Icons.circle, size: 5, color: bulletColor),
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 13, color: textColor, height: 1.5),
+
+                children: [
+                  TextSpan(
+                    text: label,
+
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+
+                      color: textColor,
+                    ),
+                  ),
+
+                  TextSpan(text: value),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdditionalPoint(
+    String text,
+    Color textColor,
+    Color bulletColor,
+  ) {
+    final separatorIndex = text.indexOf(':');
+
+    if (separatorIndex >= 0) {
+      return _buildRichBulletPoint(
+        text.substring(0, separatorIndex + 1),
+
+        text.substring(separatorIndex + 1).trim(),
+
+        textColor,
+
+        bulletColor,
+      );
+    }
+
+    return _buildRichBulletPoint('', text, textColor, bulletColor);
   }
 }

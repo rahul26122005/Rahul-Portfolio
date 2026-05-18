@@ -23,6 +23,7 @@ class AuthService {
       final doc = await _db.collection('users').doc(uid).get();
 
       if (!doc.exists) {
+        if (!context.mounted) return;
         _showUnauthorizedDialog(context);
         await logout();
         return;
@@ -45,6 +46,7 @@ class AuthService {
         await logout();
       }
     } catch (e) {
+      if (!context.mounted) return;
       _showErrorDialog(context, e.toString());
     }
   }

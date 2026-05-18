@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class TeacherDashboard extends StatefulWidget {
@@ -48,7 +49,7 @@ class _TeacherDashboardState extends State<TeacherDashboard>
   @override
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
-    return Scaffold(
+    return ZoomableScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: [
@@ -83,7 +84,7 @@ class _TeacherDashboardState extends State<TeacherDashboard>
             );
           },
         ),
-        backgroundColor: const Color(0xFF1E3C72),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
@@ -227,7 +228,7 @@ class _TeacherDashboardState extends State<TeacherDashboard>
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
+          color: _isDarkMode ? Colors.black : Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.3),
@@ -243,7 +244,11 @@ class _TeacherDashboardState extends State<TeacherDashboard>
             const SizedBox(height: 14),
             Text(
               title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: _isDarkMode ? Colors.white : Colors.black,
+              ),
             ),
           ],
         ),

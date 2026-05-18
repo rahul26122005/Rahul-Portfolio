@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:excel/excel.dart';
+import 'package:excel/excel.dart' as excel_lib;
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ManageAttendancePage extends StatefulWidget {
   const ManageAttendancePage({super.key});
@@ -18,6 +20,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   String? selectedClass;
   String? selectedSection;
   DateTime? selectedDate;
+  String selectedStatusFilter = "All";
 
   List<String> classes = [];
   List<String> sections = [];
@@ -37,6 +40,21 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
 
   bool loading = false;
   bool attendanceExists = false;
+
+  List<Map<String, dynamic>> get filteredStudents {
+    if (selectedStatusFilter == "All") return students;
+
+    return students.where((student) {
+      final reg = student['registerNo'];
+      return records[reg] == selectedStatusFilter;
+    }).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadClasses();
+  }
 
   /// ERROR DIALOG
   void showError(String msg) {
@@ -64,13 +82,10 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   Future<void> loadClasses() async {
     try {
       final snap = await db.collection("students").get();
-
       final set = <String>{};
-
       for (var d in snap.docs) {
         set.add(d['class']);
       }
-
       setState(() => classes = set.toList()..sort());
     } catch (e) {
       showError("Failed loading classes\n$e");
@@ -84,13 +99,10 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
           .collection("students")
           .where("class", isEqualTo: className)
           .get();
-
       final set = <String>{};
-
       for (var d in snap.docs) {
         set.add(d['section']);
       }
-
       setState(() => sections = set.toList()..sort());
     } catch (e) {
       showError("Failed loading sections\n$e");
@@ -131,7 +143,6 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
 
     if (picked != null) {
       setState(() => selectedDate = picked);
-
       await loadStudents();
       await loadAttendance();
     }
@@ -143,9 +154,7 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
 
     try {
       setState(() => loading = true);
-
       final classSection = "$selectedClass-$selectedSection";
-
       final monthKey = DateFormat('yyyy-MM').format(selectedDate!);
       final dateKey = DateFormat('yyyy-MM-dd').format(selectedDate!);
 
@@ -157,47 +166,39 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
           .get();
 
       Map<String, dynamic> attendanceMap = {};
-
       attendanceExists = doc.exists;
 
       if (doc.exists) {
         attendanceMap = Map<String, dynamic>.from(doc['records']);
       }
 
-      /// BUILD ORDERED RECORDS
       Map<String, dynamic> ordered = {};
-
       for (var s in students) {
         final reg = s['registerNo'];
-
         ordered[reg] = attendanceMap[reg] ?? "";
       }
 
       records = ordered;
       filteredRecords = Map.from(ordered);
-
+      selectedStatusFilter = "All";
       calculateStats();
     } catch (e) {
       showError("Failed loading attendance\n$e");
     }
-
     setState(() => loading = false);
   }
 
   /// CREATE ATTENDANCE
   Future<void> createAttendance() async {
     if (selectedDate == null) return;
-
     try {
       Map<String, dynamic> map = {};
-
       for (var s in students) {
         map[s['registerNo']] = "P";
       }
-
       records = map;
       filteredRecords = Map.from(map);
-
+      selectedStatusFilter = "All";
       await updateAttendance();
     } catch (e) {
       showError("Create attendance failed\n$e");
@@ -223,7 +224,6 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   Future<void> updateAttendance() async {
     try {
       final classSection = "$selectedClass-$selectedSection";
-
       final monthKey = DateFormat('yyyy-MM').format(selectedDate!);
       final dateKey = DateFormat('yyyy-MM-dd').format(selectedDate!);
 
@@ -234,6 +234,9 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
           .doc(dateKey)
           .set({"records": records, "isEdited": true});
 
+      calculateStats();
+      setState(() {});
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Attendance Updated")));
@@ -246,7 +249,6 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
   Future<void> deleteAttendance() async {
     try {
       final classSection = "$selectedClass-$selectedSection";
-
       final monthKey = DateFormat('yyyy-MM').format(selectedDate!);
       final dateKey = DateFormat('yyyy-MM-dd').format(selectedDate!);
 
@@ -260,6 +262,8 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
       setState(() {
         records.clear();
         filteredRecords.clear();
+        attendanceExists = false;
+        calculateStats();
       });
     } catch (e) {
       showError("Delete failed\n$e");
@@ -268,268 +272,428 @@ class _ManageAttendancePageState extends State<ManageAttendancePage> {
 
   /// EXPORT EXCEL
   void exportExcel() {
-    final excel = Excel.createExcel();
+    if (!kIsWeb) {
+      showError("Excel export is currently supported on Web only.");
+      return;
+    }
+
+    final excel = excel_lib.Excel.createExcel();
     final sheet = excel['Attendance'];
 
     sheet.appendRow([
-      TextCellValue("RegisterNo"),
-      TextCellValue("Name"),
-      TextCellValue("Status"),
+      excel_lib.TextCellValue("RegisterNo"),
+      excel_lib.TextCellValue("Name"),
+      excel_lib.TextCellValue("Status"),
     ]);
 
     for (var s in students) {
       final reg = s['registerNo'];
       final name = s['name'];
-
       sheet.appendRow([
-        TextCellValue(reg),
-        TextCellValue(name),
-        TextCellValue(records[reg] ?? ""),
+        excel_lib.TextCellValue(reg),
+        excel_lib.TextCellValue(name),
+        excel_lib.TextCellValue(records[reg] ?? ""),
       ]);
     }
 
     final bytes = excel.encode();
-
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-
-    html.AnchorElement(href: url)
-      ..setAttribute("download", "attendance.xlsx")
-      ..click();
-
-    html.Url.revokeObjectUrl(url);
+    if (bytes != null) {
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      html.AnchorElement(href: url)
+        ..setAttribute(
+          "download",
+          "attendance_${selectedClass}_${selectedSection}_${DateFormat('yyyyMMdd').format(selectedDate!)}.xlsx",
+        )
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    }
   }
 
-  /// STUDENT LIST
-  Widget attendanceList() {
-    return Expanded(
-      child: loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: students.length,
+  Widget _buildRadio(String label, String value, String reg) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<String>(
+          value: value,
+          // ignore: deprecated_member_use
+          groupValue: records[reg],
 
-              itemBuilder: (context, i) {
-                final student = students[i];
+          // ignore: deprecated_member_use
+          onChanged: (v) {
+            setState(() {
+              records[reg] = v;
+              calculateStats();
+            });
+          },
+          visualDensity: VisualDensity.compact,
+        ),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
+    );
+  }
 
-                final reg = student['registerNo'];
-                final name = student['name'];
+  Widget attendanceList(bool isMobile) {
+    if (loading) return const Center(child: CircularProgressIndicator());
+    if (students.isEmpty) {
+      return const Center(child: Text("No students found or select filters."));
+    }
+    final visibleStudents = filteredStudents;
+    if (visibleStudents.isEmpty) {
+      return const Center(child: Text("No students match this status filter."));
+    }
 
-                final status = records[reg] ?? "";
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: visibleStudents.length,
+      itemBuilder: (context, i) {
+        final student = visibleStudents[i];
+        final reg = student['registerNo'];
+        final name = student['name'];
 
-                return Card(
-                  child: ListTile(
-                    title: Text(name),
-                    subtitle: Text("Reg: $reg"),
-
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio(
-                          value: "P",
-                          groupValue: status,
-                          onChanged: (v) {
-                            setState(() => records[reg] = "P");
-                          },
-                        ),
-
-                        const Text("P"),
-
-                        Radio(
-                          value: "A",
-                          groupValue: status,
-                          onChanged: (v) {
-                            setState(() => records[reg] = "A");
-                          },
-                        ),
-
-                        const Text("A"),
-
-                        Radio(
-                          value: "OD",
-                          groupValue: status,
-                          onChanged: (v) {
-                            setState(() => records[reg] = "OD");
-                          },
-                        ),
-
-                        const Text("OD"),
-
-                        Radio(
-                          value: "HD",
-                          groupValue: status,
-                          onChanged: (v) {
-                            setState(() => records[reg] = "HD");
-                          },
-                        ),
-
-                        const Text("HD"),
-                      ],
+        if (isMobile) {
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
                   ),
-                );
-              },
+                  Text(
+                    "Reg: $reg",
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _buildRadio("P", "P", reg),
+                      _buildRadio("A", "A", reg),
+                      _buildRadio("OD", "OD", reg),
+                      _buildRadio("HD", "HD", reg),
+                    ],
+                  ),
+                ],
+              ),
             ),
+          );
+        }
+
+        return Card(
+          child: ListTile(
+            title: Text(name),
+            subtitle: Text("Reg: $reg"),
+            trailing: SizedBox(
+              width: 280,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildRadio("P", "P", reg),
+                  _buildRadio("A", "A", reg),
+                  _buildRadio("OD", "OD", reg),
+                  _buildRadio("HD", "HD", reg),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _statCard(String label, int value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withAlpha(26),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withAlpha(128)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+          Text(
+            "$value",
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
-  void initState() {
-    super.initState();
-    loadClasses();
-  }
-
-  /// UI
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final size = MediaQuery.of(context).size;
+    final bool isMobile = size.width < 800;
+
+    return ZoomableScaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
           Builder(
             builder: (context) => IconButton(
-              onPressed: () {
-                Scaffold.of(context).openEndDrawer();
-              },
-              icon: Icon(Icons.menu, color: Colors.white),
-              iconSize: 22,
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              icon: const Icon(Icons.menu, color: Colors.white),
             ),
           ),
         ],
-        title: LayoutBuilder(
-          builder: (context, constraints) {
-            return Text(
-              "AMS-Admin Panel",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: constraints.maxWidth < 600 ? 18 : 24,
-                color: Colors.white,
-                fontFeatures: const [FontFeature.enable('swap')],
-                fontStyle: FontStyle.italic,
-                shadows: const [
-                  Shadow(
-                    offset: Offset(2, 2),
-                    blurRadius: 10,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-            );
-          },
+        title: Text(
+          "Manage Attendance",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: isMobile ? 18 : 22,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: const Color(0xFF1E3C72),
+        elevation: 4,
       ),
       endDrawer: DrawerPage(
         isDarkMode: _isDarkMode,
         onThemeChange: _toggleTheme,
       ),
-
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-
-        child: Column(
-          children: [
-            /// FILTERS
-            Row(
-              children: [
-                DropdownButton<String>(
-                  hint: const Text("Class"),
-
-                  value: selectedClass,
-
-                  items: classes
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                      .toList(),
-
-                  onChanged: (v) {
-                    setState(() => selectedClass = v);
-
-                    loadSections(v!);
-                  },
-                ),
-
-                const SizedBox(width: 20),
-
-                DropdownButton<String>(
-                  hint: const Text("Section"),
-
-                  value: selectedSection,
-
-                  items: sections
-                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                      .toList(),
-
-                  onChanged: selectedClass == null
-                      ? null
-                      : (v) => setState(() => selectedSection = v),
-                ),
-
-                const SizedBox(width: 20),
-
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.calendar_month),
-                  label: Text(
-                    selectedDate == null
-                        ? "Pick Date"
-                        : DateFormat('yyyy-MM-dd').format(selectedDate!),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        constraints: const BoxConstraints(maxWidth: 1000),
+        padding: EdgeInsets.all(isMobile ? 12 : 24),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // FILTERS SECTION
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Selection Filters",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: isMobile ? double.infinity : 150,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: "Class",
+                                border: OutlineInputBorder(),
+                              ),
+                              initialValue: selectedClass,
+                              items: classes
+                                  .map(
+                                    (c) => DropdownMenuItem(
+                                      value: c,
+                                      child: Text(c),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) {
+                                setState(() {
+                                  selectedClass = v;
+                                  selectedSection = null;
+                                });
+                                if (v != null) loadSections(v);
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: isMobile ? double.infinity : 150,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: "Section",
+                                border: OutlineInputBorder(),
+                              ),
+                              initialValue: selectedSection,
+                              items: sections
+                                  .map(
+                                    (s) => DropdownMenuItem(
+                                      value: s,
+                                      child: Text(s),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: selectedClass == null
+                                  ? null
+                                  : (v) => setState(() => selectedSection = v),
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 18,
+                              ),
+                            ),
+                            icon: const Icon(Icons.calendar_month),
+                            label: Text(
+                              selectedDate == null
+                                  ? "Pick Date"
+                                  : DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(selectedDate!),
+                            ),
+                            onPressed: pickDate,
+                          ),
+                          SizedBox(
+                            width: isMobile ? double.infinity : 170,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                labelText: "Status",
+                                border: OutlineInputBorder(),
+                              ),
+                              initialValue: selectedStatusFilter,
+                              items: const [
+                                DropdownMenuItem(
+                                  value: "All",
+                                  child: Text("All"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "P",
+                                  child: Text("Present"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "A",
+                                  child: Text("Absent"),
+                                ),
+                                DropdownMenuItem(
+                                  value: "OD",
+                                  child: Text("OD"),
+                                ),
+                              ],
+                              onChanged: records.isEmpty
+                                  ? null
+                                  : (v) => setState(
+                                      () => selectedStatusFilter = v ?? "All",
+                                    ),
+                            ),
+                          ),
+                          if (!attendanceExists &&
+                              selectedDate != null &&
+                              students.isNotEmpty)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 18,
+                                ),
+                              ),
+                              onPressed: createAttendance,
+                              child: const Text("Initialize Attendance"),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                  onPressed: pickDate,
                 ),
+              ),
 
-                const SizedBox(width: 20),
+              const SizedBox(height: 20),
 
-                if (!attendanceExists && selectedDate != null)
-                  ElevatedButton(
-                    onPressed: createAttendance,
-                    child: const Text("Create Attendance"),
-                  ),
+              // STATS SECTION
+              if (students.isNotEmpty) ...[
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _statCard("Present", present, Colors.green),
+                    _statCard("Absent", absent, Colors.red),
+                    _statCard("OD", od, Colors.blue),
+                    _statCard("HD", hd, Colors.orange),
+                  ],
+                ),
+                const SizedBox(height: 20),
               ],
-            ),
 
-            const SizedBox(height: 10),
+              // LIST SECTION
+              attendanceList(isMobile),
 
-            /// STATS
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text("Present: $present"),
-                Text("Absent: $absent"),
-                Text("OD: $od"),
-                Text("HD: $hd"),
-              ],
-            ),
+              const SizedBox(height: 24),
 
-            const SizedBox(height: 10),
-
-            attendanceList(),
-
-            const SizedBox(height: 10),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-
-              children: [
-                ElevatedButton(
-                  onPressed: updateAttendance,
-                  child: const Text("Update"),
+              // ACTIONS SECTION
+              if (students.isNotEmpty)
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 16,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.save),
+                      label: const Text("Update Attendance"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        backgroundColor: const Color(0xFF1E3C72),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: updateAttendance,
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.delete_forever),
+                      label: const Text("Delete Record"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        backgroundColor: Colors.red[700],
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: deleteAttendance,
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.download),
+                      label: const Text("Export Excel"),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: exportExcel,
+                    ),
+                  ],
                 ),
-
-                const SizedBox(width: 20),
-
-                ElevatedButton(
-                  onPressed: deleteAttendance,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: const Text("Delete"),
-                ),
-
-                const SizedBox(width: 20),
-
-                ElevatedButton(
-                  onPressed: exportExcel,
-                  child: const Text("Export Excel"),
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

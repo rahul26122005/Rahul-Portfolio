@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/services/auth_service.dart';
+import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,13 +15,60 @@ class _SignupScreenState extends State<SignupScreen> {
   final nameCtrl = TextEditingController();
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  final nameFocus = FocusNode();
+  final emailFocus = FocusNode();
+  final passwordFocus = FocusNode();
 
   bool _obscurePassword = true;
   bool loading = false;
 
   @override
+  void dispose() {
+    nameCtrl.dispose();
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    nameFocus.dispose();
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitSignup() async {
+    if (loading) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() => loading = true);
+
+    try {
+      await AuthService().teacherSignup(
+        name: nameCtrl.text.trim(),
+        email: emailCtrl.text.trim(),
+        password: passCtrl.text.trim(),
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Signup successful")));
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ZoomableScaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -66,6 +114,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         // Name
                         TextFormField(
                           controller: nameCtrl,
+                          focusNode: nameFocus,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) {
+                            FocusScope.of(context).requestFocus(emailFocus);
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Name is required";
@@ -88,7 +141,12 @@ class _SignupScreenState extends State<SignupScreen> {
                         //  Email
                         TextFormField(
                           controller: emailCtrl,
+                          focusNode: emailFocus,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) {
+                            FocusScope.of(context).requestFocus(passwordFocus);
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Email is required";
@@ -114,7 +172,10 @@ class _SignupScreenState extends State<SignupScreen> {
                         // Password
                         TextFormField(
                           controller: passCtrl,
+                          focusNode: passwordFocus,
                           obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _submitSignup(),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return "Password is required";
@@ -154,46 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           width: double.infinity,
                           height: 48,
                           child: FilledButton(
-                            onPressed: loading
-                                ? null
-                                : () async {
-                                    if (!_formKey.currentState!.validate()) {
-                                      return;
-                                    }
-
-                                    setState(() => loading = true);
-
-                                    try {
-                                      await AuthService().teacherSignup(
-                                        name: nameCtrl.text.trim(),
-                                        email: emailCtrl.text.trim(),
-                                        password: passCtrl.text.trim(),
-                                      );
-
-                                      if (!mounted) return;
-
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text("Signup successful"),
-                                        ),
-                                      );
-
-                                      Navigator.pop(context);
-                                    } catch (e) {
-                                      if (!mounted) return;
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
-                                    } finally {
-                                      if (mounted) {
-                                        setState(() => loading = false);
-                                      }
-                                    }
-                                  },
+                            onPressed: loading ? null : _submitSignup,
                             child: loading
                                 ? const SizedBox(
                                     height: 22,
