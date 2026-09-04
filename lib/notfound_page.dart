@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class NotFoundPage extends StatefulWidget {
   const NotFoundPage({super.key});
@@ -23,7 +22,7 @@ class _NotFoundPageState extends State<NotFoundPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
       appBar: AppBar(
         title: const Text('Page Not Found'),

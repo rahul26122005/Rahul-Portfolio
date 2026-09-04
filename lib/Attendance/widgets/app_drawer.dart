@@ -148,9 +148,14 @@ class _DrawerPageState extends State<DrawerPage> {
                   onTap: () => _navigate(AppRoutes.manageAttendance),
                 ),
                 _menuTile(
+                  icon: Icons.fact_check,
+                  title: 'Mark Absents',
+                  onTap: () => _navigate(AppRoutes.markAbsents),
+                ),
+                _menuTile(
                   icon: Icons.analytics_outlined,
                   title: 'Six Months Report',
-                  onTap: () => _navigate(AppRoutes.generateReport),
+                  onTap: () => _navigate(AppRoutes.sixmonthreports),
                 ),
                 _menuTile(
                   icon: Icons.settings,
@@ -192,7 +197,16 @@ class _DrawerPageState extends State<DrawerPage> {
                   title: 'Manage Attendance',
                   onTap: () => _navigate(AppRoutes.fullAttendance),
                 ),
-
+                _menuTile(
+                  icon: Icons.fact_check,
+                  title: 'Mark Absents',
+                  onTap: () => _navigate(AppRoutes.markAbsent),
+                ),
+                _menuTile(
+                  icon: Icons.analytics_outlined,
+                  title: 'Six Months Report',
+                  onTap: () => _navigate(AppRoutes.sixmonthreport),
+                ),
                 _menuTile(
                   icon: Icons.settings,
                   title: 'Settings',

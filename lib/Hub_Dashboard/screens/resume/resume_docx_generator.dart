@@ -27,6 +27,9 @@ Uint8List generateResumeDocx(
   String runNormal(String text, {int size = 22}) =>
       '<w:r><w:rPr>${fontSizeAttribute(size)}</w:rPr><w:t xml:space="preserve">${escape(text)}</w:t></w:r>';
 
+  String runHyperlink(String text, String url, {int size = 22}) =>
+      '<w:hyperlink r:id="rIdLinkedIn" w:history="1"><w:r><w:rPr>${fontSizeAttribute(size)}<w:color w:val="0000FF"/><w:u w:val="single"/></w:rPr><w:t xml:space="preserve">${escape(text)}</w:t></w:r></w:hyperlink>';
+
   String paragraphWithRuns(List<String> runs, {bool divider = false}) {
     final runsXml = runs.join();
     final border = divider
@@ -45,11 +48,22 @@ Uint8List generateResumeDocx(
   content.writeln(
     paragraphWithRuns([runBold(resume.subHeadline, size: subHeadlineFontSize)]),
   );
-  content.writeln(
-    paragraphWithRuns([
-      runNormal(resume.contactLine, size: contactFontSize),
-    ], divider: true),
-  );
+  final contactSegments = resume.contactLine.split(' | ');
+  final contactRuns = <String>[];
+  for (var i = 0; i < contactSegments.length; i++) {
+    final segment = contactSegments[i];
+    if (segment.startsWith('LinkedIn:')) {
+      contactRuns.add(
+        runHyperlink(segment, resume.linkedInUrl, size: contactFontSize),
+      );
+    } else {
+      contactRuns.add(runNormal(segment, size: contactFontSize));
+    }
+    if (i < contactSegments.length - 1) {
+      contactRuns.add(runNormal(' | ', size: contactFontSize));
+    }
+  }
+  content.writeln(paragraphWithRuns(contactRuns, divider: true));
   content.writeln(
     paragraphWithRuns([
       runBold('SUMMARY', size: sectionHeaderFontSize),
@@ -68,7 +82,7 @@ Uint8List generateResumeDocx(
   }
   content.writeln(
     paragraphWithRuns([
-      runBold('PROJECTS/INTERNSHIPS', size: sectionHeaderFontSize),
+      runBold('EXPERIENCE', size: sectionHeaderFontSize),
     ], divider: true),
   );
   for (var p in resume.projects) {
@@ -121,6 +135,23 @@ Uint8List generateResumeDocx(
     content.writeln(paragraphWithRuns([runNormal('- $a', size: bodyFontSize)]));
   }
 
+  content.writeln(
+    paragraphWithRuns([
+      runBold('EXTERNAL LINKS', size: sectionHeaderFontSize),
+    ], divider: true),
+  );
+  for (var link in resume.external) {
+    if (link.startsWith('LinkedIn:')) {
+      content.writeln(
+        paragraphWithRuns([
+          runHyperlink(link, resume.linkedInUrl, size: bodyFontSize),
+        ]),
+      );
+    } else {
+      content.writeln(paragraphWithRuns([runNormal(link, size: bodyFontSize)]));
+    }
+  }
+
   final documentXml =
       '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -156,7 +187,9 @@ Uint8List generateResumeDocx(
   addText(
     'word/_rels/document.xml.rels',
     '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>''',
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rIdLinkedIn" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${escape(resume.linkedInUrl)}" TargetMode="External"/>
+</Relationships>''',
   );
   addText('word/document.xml', documentXml);
 

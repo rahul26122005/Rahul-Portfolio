@@ -3,20 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart' as excel_lib;
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-class AttendanceReportGeneratePage extends StatefulWidget {
-  const AttendanceReportGeneratePage({super.key});
+class AttendanceReportGeneratePages extends StatefulWidget {
+  const AttendanceReportGeneratePages({super.key});
 
   @override
-  State<AttendanceReportGeneratePage> createState() =>
-      _AttendanceReportGeneratePageState();
+  State<AttendanceReportGeneratePages> createState() =>
+      _AttendanceReportGeneratePageStates();
 }
 
-class _AttendanceReportGeneratePageState
-    extends State<AttendanceReportGeneratePage> {
+class _AttendanceReportGeneratePageStates
+    extends State<AttendanceReportGeneratePages> {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   bool _isDarkMode = true;
   String? selectedClass;
@@ -258,7 +257,7 @@ class _AttendanceReportGeneratePageState
     final size = MediaQuery.of(context).size;
     final bool isMobile = size.width < 800;
 
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(

@@ -4,7 +4,6 @@ import 'package:excel/excel.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class UploadMarksPage extends StatefulWidget {
@@ -231,7 +230,7 @@ class _UploadMarksPageState extends State<UploadMarksPage> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {

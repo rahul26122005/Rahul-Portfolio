@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+
 
 class ManageStudentsPage extends StatefulWidget {
   const ManageStudentsPage({super.key});
@@ -199,17 +199,21 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       labelText: "Select Class",
                       border: OutlineInputBorder(),
                     ),
-                    value: classValue,
+                    initialValue: classValue,
                     items: classes
-                        .map((c) => DropdownMenuItem(
-                              value: c,
-                              child: Text(c, overflow: TextOverflow.ellipsis),
-                            ))
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Text(c, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setStatePopup(() {
@@ -226,17 +230,21 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       labelText: "Select Section",
                       border: OutlineInputBorder(),
                     ),
-                    value: sectionValue,
+                    initialValue: sectionValue,
                     items: (classSections[classValue] ?? [])
-                        .map((s) => DropdownMenuItem(
-                              value: s,
-                              child: Text(s, overflow: TextOverflow.ellipsis),
-                            ))
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(s, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setStatePopup(() {
@@ -351,7 +359,7 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
         actions: [
@@ -436,17 +444,21 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       labelText: "Class",
                       border: OutlineInputBorder(),
                     ),
-                    value: selectedClass,
+                    initialValue: selectedClass,
                     items: classes
-                        .map((c) => DropdownMenuItem(
-                              value: c,
-                              child: Text(c, overflow: TextOverflow.ellipsis),
-                            ))
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Text(c, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setState(() {
@@ -465,17 +477,21 @@ class _ManageStudentsPageState extends State<ManageStudentsPage> {
                     isExpanded: true,
                     decoration: const InputDecoration(
                       isDense: true,
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       labelText: "Section",
                       border: OutlineInputBorder(),
                     ),
-                    value: selectedSection,
+                    initialValue: selectedSection,
                     items: (classSections[selectedClass] ?? [])
-                        .map((s) => DropdownMenuItem(
-                              value: s,
-                              child: Text(s, overflow: TextOverflow.ellipsis),
-                            ))
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s,
+                            child: Text(s, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
                         .toList(),
                     onChanged: (v) {
                       setState(() => selectedSection = v);

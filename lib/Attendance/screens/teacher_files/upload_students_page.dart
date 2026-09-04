@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class UploadStudentsPage extends StatefulWidget {
@@ -33,13 +33,13 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
             Navigator.popAndPushNamed(context, AppRoutes.teacherDashboard);
           },
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
         ),
         actions: [
           Builder(
@@ -47,7 +47,7 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
               onPressed: () {
                 Scaffold.of(context).openEndDrawer();
               },
-              icon: Icon(Icons.menu, color: Colors.white),
+              icon: const Icon(Icons.menu, color: Colors.white),
               iconSize: 22,
             ),
           ),
@@ -55,7 +55,7 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.teacherDashboard);
             },
-            icon: Icon(Icons.home, color: Colors.white),
+            icon: const Icon(Icons.home, color: Colors.white),
           ),
         ],
         title: LayoutBuilder(
@@ -207,16 +207,39 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
 
   // ================= CORE UPLOAD =================
   Future<void> _uploadExcel() async {
+    FirebaseApp? secondaryApp;
+
     try {
       setState(() => isUploading = true);
 
-      final bytes = selectedFile!.bytes!;
+      if (selectedFile == null) {
+        throw Exception("Please select an Excel file");
+      }
+
+      final teacher = _auth.currentUser;
+
+      if (teacher == null) {
+        throw Exception("Teacher not logged in");
+      }
+
+      final teacherId = teacher.uid;
+
+      final bytes = selectedFile!.bytes;
+
+      if (bytes == null) {
+        throw Exception("Invalid Excel file");
+      }
+
       final excel = Excel.decodeBytes(bytes);
+
+      if (excel.tables.isEmpty) {
+        throw Exception("Excel sheet is empty");
+      }
+
       final sheet = excel.tables.values.first;
-      final teacherId = _auth.currentUser!.uid;
 
       // Secondary Firebase App
-      final secondaryApp = await Firebase.initializeApp(
+      secondaryApp = await Firebase.initializeApp(
         name: 'studentCreator',
         options: Firebase.app().options,
       );
@@ -228,89 +251,105 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
       int uploaded = 0;
 
       for (int i = 1; i < sheet.rows.length; i++) {
-        final row = sheet.rows[i];
-
-        if (row.length < 6) continue;
-
-        final name = row[0]?.value?.toString().trim();
-        final registerNo = row[1]?.value?.toString().trim();
-        final className = row[2]?.value?.toString().trim();
-        final section = row[3]?.value?.toString().trim();
-        final dob = row[4]?.value?.toString().trim();
-        final fatherMobile = row[5]?.value?.toString().trim();
-
-        if ([
-          name,
-          registerNo,
-          className,
-          section,
-          dob,
-          fatherMobile,
-        ].any((e) => e == null || e.isEmpty)) {
-          continue;
-        }
-
-        final email = "$registerNo.student.rahulportfolio@gmail.com";
-        final password = dob!; // 2006-05-21T00:00:00.000Z
-
-        UserCredential cred;
-
         try {
-          cred = await studentAuth.createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-        } on FirebaseAuthException catch (e) {
-          if (e.code == 'email-already-in-use') {
-            cred = await studentAuth.signInWithEmailAndPassword(
+          final row = sheet.rows[i];
+
+          if (row.length < 6) continue;
+
+          final name = row[0]?.value?.toString().trim() ?? "";
+          final registerNo = row[1]?.value?.toString().trim() ?? "";
+          final className = row[2]?.value?.toString().trim() ?? "";
+          final section = row[3]?.value?.toString().trim() ?? "";
+          final dob = row[4]?.value?.toString().trim() ?? "";
+          final fatherMobile = row[5]?.value?.toString().trim() ?? "";
+
+          if (name.isEmpty ||
+              registerNo.isEmpty ||
+              className.isEmpty ||
+              section.isEmpty ||
+              dob.isEmpty ||
+              fatherMobile.isEmpty) {
+            continue;
+          }
+
+          final email = "$registerNo.student.rahulportfolio@gmail.com";
+
+          // SAFE PASSWORD
+          final password = dob;
+
+          UserCredential cred;
+
+          try {
+            cred = await studentAuth.createUserWithEmailAndPassword(
               email: email,
               password: password,
             );
-          } else {
+          } on FirebaseAuthException catch (e) {
+            // USER ALREADY EXISTS
+            if (e.code == 'email-already-in-use') {
+              debugPrint("Student already exists: $email");
+              continue;
+            }
+
             rethrow;
           }
+
+          final uid = cred.user!.uid;
+
+          // USERS COLLECTION
+          await _db.collection('users').doc(uid).set({
+            'uid': uid,
+            'name': name,
+            'registerNo': registerNo,
+            'class': className,
+            'section': section,
+            'dob': dob,
+            'email': email,
+            'role': 'student',
+            'teacherId': teacherId,
+            'fatherMobile': fatherMobile,
+            'active': true,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+          // STUDENTS COLLECTION
+          await _db.collection('students').doc(uid).set({
+            'name': name,
+            'registerNo': registerNo,
+            'class': className,
+            'section': section,
+            'dob': dob,
+            'teacherId': teacherId,
+            'fatherMobile': fatherMobile,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+          uploaded++;
+        } catch (e) {
+          debugPrint("Row Upload Error: $e");
         }
-
-        final uid = cred.user!.uid;
-
-        // USERS COLLECTION
-        await _db.collection('users').doc(uid).set({
-          'uid': uid,
-          'name': name,
-          'registerNo': registerNo,
-          'class': className,
-          'section': section,
-          'dob': dob,
-          'email': email,
-          'role': 'student',
-          'teacherId': teacherId,
-          'fatherMobile': fatherMobile,
-          'active': true,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        // STUDENTS COLLECTION
-        await _db.collection('students').doc(uid).set({
-          'name': name,
-          'registerNo': registerNo,
-          'class': className,
-          'section': section,
-          'dob': dob,
-          'teacherId': teacherId,
-          'fatherMobile': fatherMobile,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-
-        uploaded++;
       }
 
-      await secondaryApp.delete(); // cleanup
+      // cleanup
+      await secondaryApp.delete();
+
+      if (!mounted) return;
 
       setState(() => isUploading = false);
+
       _showSuccess(uploaded);
     } catch (e) {
+      if (secondaryApp != null) {
+        await secondaryApp.delete();
+      }
+
+      if (!mounted) return;
+
       setState(() => isUploading = false);
+
       _showError(e.toString());
+
+      debugPrint("Upload Error: $e");
     }
   }
 
@@ -333,6 +372,7 @@ class _UploadStudentsPageState extends State<UploadStudentsPage> {
   // ================= ERROR =================
   void _showError(String message) {
     if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

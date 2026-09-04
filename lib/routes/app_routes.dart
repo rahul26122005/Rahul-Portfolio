@@ -1,10 +1,12 @@
 //app routes.dart (page)
 import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/Attendance/screens/teacher_files/mark_attendance_present.dart';
 //import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_editor_page.dart';
 //import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_list_page.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/screens/resume/resume_view_page.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/screens/screens.dart';
 import 'package:my_flutter_webside/admin/admin_panel.dart';
+import 'package:my_flutter_webside/admin/attendance_report_generate_page.dart';
 import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
 import 'package:my_flutter_webside/admin/manage_classes_page.dart';
 import 'package:my_flutter_webside/admin/manage_teachers_page.dart';
@@ -24,10 +26,12 @@ class AppRoutes {
 
   static const String uploadStudents = '/attendance/teacher/upload_students';
   static const String markAttendance = '/attendance/teacher/mark_attendance';
+  static const String markAbsent = '/attendance/teacher/mark_absent';
   static const String uploadMarks = '/attendance/teacher/upload_marks';
   static const String generateReport = '/attendance/teacher/generate_report';
   static const String monthlysummary = '/attendance/teacher/monthly_summary';
   static const String fullAttendance = '/attendance/teacher/manage_attendance';
+  static const String sixmonthreport = '/attendance/teacher/sixmonthreport';
   static const String teacherssettings = '/attendance/teacher/settings';
 
   static const String studentDashboard = '/attendance/student/dashboard';
@@ -39,6 +43,8 @@ class AppRoutes {
   static const String manageClasses = '/admin/classes';
   static const String manageTeachers = '/admin/teachers';
   static const String manageAttendance = '/admin/manage_attendance';
+  static const String markAbsents = '/admin/mark_absent';
+  static const String sixmonthreports = '/admin/sixmonthreports';
   static const String adminsettings = '/admin/settings';
 
   static const String dashboard = '/portfolio/dashboard';
@@ -73,6 +79,11 @@ class AppRoutes {
       child: const AttendancePage(),
     ),
 
+    markAbsent: (context) => RoleGuard(
+      allowedRoles: const ['teacher', 'admin'],
+      child: const ManageAttendancePageAbsent(),
+    ),
+
     uploadMarks: (context) => RoleGuard(
       allowedRoles: const ['teacher', 'admin'],
       child: const UploadMarksPage(),
@@ -85,6 +96,10 @@ class AppRoutes {
     monthlysummary: (context) => RoleGuard(
       allowedRoles: const ['teacher', 'admin'],
       child: const MonthlySummaryPage(),
+    ),
+    sixmonthreport: (context) => RoleGuard(
+      allowedRoles: const ['teacher', 'admin'],
+      child: const AttendanceReportGeneratePages(),
     ),
     fullAttendance: (context) => RoleGuard(
       allowedRoles: const ['teacher'],
@@ -124,6 +139,15 @@ class AppRoutes {
       child: const ManageStudentsPage(),
     ),
 
+    markAbsents: (context) => RoleGuard(
+      allowedRoles: const ['teacher', 'admin'],
+      child: const ManageAttendancePageAbsent(),
+    ),
+
+    sixmonthreports: (context) => RoleGuard(
+      allowedRoles: const ['teacher', 'admin'],
+      child: const AttendanceReportGeneratePages(),
+    ),
     manageTeachers: (context) => RoleGuard(
       allowedRoles: const ['admin'],
       child: const ManageUsersPage(),

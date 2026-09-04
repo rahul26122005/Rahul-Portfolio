@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_webside/Attendance/screens/teacher_files/mark_attendance_present.dart';
 import 'package:my_flutter_webside/admin/manage_attendance_page.dart';
 import 'package:my_flutter_webside/settings/settings_page.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,7 +7,7 @@ import 'manage_classes_page.dart';
 import 'manage_teachers_page.dart';
 import 'attendance_report_generate_page.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -25,7 +26,7 @@ class _AdminPanelState extends State<AdminPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: [
@@ -95,6 +96,16 @@ class _AdminPanelState extends State<AdminPanel> {
           ),
 
           _adminTile(
+            icon: Icons.fact_check,
+            title: "Mark Absent",
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ManageAttendancePageAbsent(),
+              ),
+            ),
+          ),
+          _adminTile(
             icon: Icons.people,
             title: "Settings",
             onTap: () => Navigator.push(
@@ -108,7 +119,7 @@ class _AdminPanelState extends State<AdminPanel> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => const AttendanceReportGeneratePage(),
+                builder: (_) => const AttendanceReportGeneratePages(),
               ),
             ), // Ensure this route is defined
           ),

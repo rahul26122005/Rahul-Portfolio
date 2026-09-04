@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});
@@ -93,7 +92,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
 
       appBar: AppBar(

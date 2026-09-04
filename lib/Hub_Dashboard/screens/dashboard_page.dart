@@ -4,7 +4,6 @@ import 'package:my_flutter_webside/Hub_Dashboard/widgets/emptystate.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/errorstate.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/project_card.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:my_flutter_webside/main.dart';
@@ -49,7 +48,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       drawer: DrawerPage(isDarkMode: _isDarkMode, onThemeChange: _toggleTheme),
 
       appBar: AppBar(

@@ -2,8 +2,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:my_flutter_webside/Hub_Dashboard/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 import 'package:my_flutter_webside/utils/file_downloader.dart';
 
@@ -51,7 +51,7 @@ class _ResumeViewPageState extends State<ResumeViewPage> {
 
     final resume = sampleResume();
 
-    return ZoomableScaffold(
+    return Scaffold(
       backgroundColor: scaffoldBackgroundColor,
 
       endDrawer: DrawerPage(isDarkMode: isDarkMode, onThemeChange: (_) {}),
@@ -189,17 +189,7 @@ class _ResumeViewPageState extends State<ResumeViewPage> {
 
                     const SizedBox(height: 8),
 
-                    Text(
-                      resume.contactLine,
-
-                      style: TextStyle(
-                        fontSize: 13,
-
-                        color: secondaryTextColor,
-
-                        height: 1.5,
-                      ),
-                    ),
+                    _buildContactLine(resume, secondaryTextColor),
 
                     const SizedBox(height: 10),
 
@@ -247,9 +237,9 @@ class _ResumeViewPageState extends State<ResumeViewPage> {
 
                     const SizedBox(height: 10),
 
-                    // ================= PROJECTS =================
+                    // ================= EXPERIENCE =================
                     _buildSectionHeader(
-                      "PROJECTS/INTERNSHIPS",
+                      "EXPERIENCE",
 
                       accentColor,
 
@@ -327,6 +317,25 @@ class _ResumeViewPageState extends State<ResumeViewPage> {
                         textColor,
 
                         secondaryTextColor,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    _buildSectionHeader(
+                      'EXTERNAL LINKS',
+                      accentColor,
+                      sectionHeaderSize,
+                      textColor,
+                    ),
+                    ...resume.external.map(
+                      (externalItem) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _buildExternalLink(
+                          externalItem,
+                          resume,
+                          secondaryTextColor,
+                        ),
                       ),
                     ),
 
@@ -452,6 +461,64 @@ class _ResumeViewPageState extends State<ResumeViewPage> {
           color: color,
         ),
       ],
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Widget _buildContactLine(Resume resume, Color textColor) {
+    final segments = resume.contactLine.split(' | ');
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        for (var i = 0; i < segments.length; i++) ...[
+          Text(
+            segments[i],
+            style: TextStyle(fontSize: 13, color: textColor, height: 1.5),
+          ),
+          if (i < segments.length - 1)
+            Text(
+              ' | ',
+              style: TextStyle(fontSize: 13, color: textColor, height: 1.5),
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildExternalLink(
+    String externalItem,
+    Resume resume,
+    Color textColor,
+  ) {
+    if (externalItem.startsWith('LinkedIn:')) {
+      return TextButton(
+        onPressed: () => _launchUrl(resume.linkedInUrl),
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          alignment: Alignment.centerLeft,
+        ),
+        child: Text(
+          externalItem,
+          style: TextStyle(
+            fontSize: 13,
+            color: Colors.blue,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      );
+    }
+
+    return Text(
+      externalItem,
+      style: TextStyle(fontSize: 13, color: textColor, height: 1.5),
     );
   }
 

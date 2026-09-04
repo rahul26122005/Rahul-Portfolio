@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class MonthlySummaryPage extends StatefulWidget {
@@ -94,7 +93,7 @@ class _MonthlySummaryPageState extends State<MonthlySummaryPage> {
     final total = p + a + od + hd;
     final percent = total == 0 ? 0 : ((p + od + (hd * 0.5)) / total) * 100;
 
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {

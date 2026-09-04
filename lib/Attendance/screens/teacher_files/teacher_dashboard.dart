@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_webside/Attendance/widgets/app_drawer.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
 import 'package:my_flutter_webside/routes/app_routes.dart';
 
 class TeacherDashboard extends StatefulWidget {
@@ -49,7 +48,7 @@ class _TeacherDashboardState extends State<TeacherDashboard>
   @override
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
-    return ZoomableScaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         actions: [
@@ -209,6 +208,12 @@ class _TeacherDashboardState extends State<TeacherDashboard>
           title: "Manage Attendance",
           color: Colors.amberAccent,
           onTap: () => Navigator.pushNamed(context, AppRoutes.fullAttendance),
+        ),
+        _dashboardCard(
+          icon: Icons.fact_check,
+          title: "Mark Absent",
+          color: Colors.deepOrange,
+          onTap: () => Navigator.pushNamed(context, AppRoutes.markAbsent),
         ),
       ],
     );

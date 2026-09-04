@@ -5,6 +5,38 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'resume_data.dart';
 
+pw.Widget _buildContactLine(Resume resume, pw.Font ttf, pw.TextStyle style) {
+  final segments = resume.contactLine.split(' | ');
+  final children = <pw.Widget>[];
+
+  for (var i = 0; i < segments.length; i++) {
+    final segment = segments[i];
+    if (segment.startsWith('LinkedIn:')) {
+      children.add(
+        pw.UrlLink(
+          destination: resume.linkedInUrl,
+          child: pw.Text(
+            segment,
+            style: pw.TextStyle(
+              font: ttf,
+              fontSize: 11,
+              color: PdfColors.blue,
+              decoration: pw.TextDecoration.underline,
+            ),
+          ),
+        ),
+      );
+    } else {
+      children.add(pw.Text(segment, style: style));
+    }
+    if (i < segments.length - 1) {
+      children.add(pw.Text(' | ', style: style));
+    }
+  }
+
+  return pw.Wrap(children: children);
+}
+
 Future<Uint8List> generateResumePdf(Resume resume) async {
   final pdf = pw.Document();
 
@@ -54,7 +86,7 @@ Future<Uint8List> generateResumePdf(Resume resume) async {
             pw.Text(resume.headline, style: headerStyle),
             pw.Text(resume.subHeadline, style: subHeaderStyle),
             pw.SizedBox(height: 8),
-            pw.Text(resume.contactLine, style: smallStyle),
+            _buildContactLine(resume, ttf, smallStyle),
             pw.SizedBox(height: 12),
             pw.Container(height: 1, color: PdfColors.black),
             pw.SizedBox(height: 12),
@@ -99,7 +131,7 @@ Future<Uint8List> generateResumePdf(Resume resume) async {
             pw.SizedBox(height: 10),
 
             pw.Text(
-              'PROJECTS/INTERNSHIPS',
+              'EXPERIENCE',
               style: pw.TextStyle(
                 font: ttf,
                 fontSize: 16,
@@ -201,6 +233,40 @@ Future<Uint8List> generateResumePdf(Resume resume) async {
                 ],
               ),
             ),
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'EXTERNAL LINKS',
+              style: pw.TextStyle(
+                font: ttf,
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+              ),
+            ),
+            pw.SizedBox(height: 3),
+            pw.Container(height: 1, color: PdfColors.black),
+            pw.SizedBox(height: 6),
+            ...resume.external.map((link) {
+              if (link.startsWith('LinkedIn:')) {
+                return pw.Row(
+                  children: [
+                    pw.Text('LinkedIn: ', style: bodyStyle),
+                    pw.UrlLink(
+                      destination: resume.linkedInUrl,
+                      child: pw.Text(
+                        resume.linkedInUrl,
+                        style: pw.TextStyle(
+                          font: ttf,
+                          fontSize: 11,
+                          color: PdfColors.blue,
+                          decoration: pw.TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return pw.Text(link, style: bodyStyle);
+            }),
           ],
         ),
       ],

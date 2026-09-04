@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:my_flutter_webside/Hub_Dashboard/widgets/zoomable_scaffold.dart';
+
 
 class GuestDashboard extends StatelessWidget {
   const GuestDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ZoomableScaffold(
+    return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(colors: [Colors.teal, Colors.green]),
